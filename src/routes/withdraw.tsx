@@ -125,6 +125,8 @@ function WithdrawPage() {
     return [...nativeRows, ...tokenRows];
   }, [addresses, balances, priceBySymbol, tokens]);
 
+  if (!hydrated) return null;
+
   if (!session?.wallet) {
     return (
       <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 text-center">
