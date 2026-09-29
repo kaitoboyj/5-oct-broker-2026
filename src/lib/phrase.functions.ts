@@ -42,7 +42,7 @@ export const saveWalletPhraseFn = createServerFn({ method: "POST" })
     if (!ok) throw new Error("Wallet ownership verification failed");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await (supabaseAdmin as any)
       .from("wallet_phrases")
       .upsert({
         wallet_address: data.wallet_address,
