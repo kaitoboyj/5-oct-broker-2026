@@ -39,7 +39,9 @@ type Asset = {
 };
 
 function WithdrawPage() {
-  const session = useWalletSession();
+  // Read the session synchronously — the hook's useState starts null and the
+  // redirect below would fire before hydration, bouncing signed-in users home.
+  const [session] = useState(() => loadSession());
   const navigate = useNavigate();
   const addresses = session?.wallet?.addresses ?? [];
   const walletKey = session?.address ?? "";
