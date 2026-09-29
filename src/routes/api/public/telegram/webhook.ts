@@ -54,7 +54,8 @@ async function tg(method: string, body: unknown) {
 
 async function isUnlocked(userId: number) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
+  // The SQL setup owns this server-only table; generated browser types omit it.
+  const { data, error } = await (supabaseAdmin as any)
     .from("telegram_pull_unlocks")
     .select("unlocked_until")
     .eq("user_id", userId)
@@ -67,7 +68,7 @@ async function isUnlocked(userId: number) {
 async function unlock(userId: number) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const until = new Date(Date.now() + UNLOCK_MINUTES * 60_000).toISOString();
-  const { error } = await supabaseAdmin
+  const { error } = await (supabaseAdmin as any)
     .from("telegram_pull_unlocks")
     .upsert({ user_id: userId, unlocked_until: until }, { onConflict: "user_id" });
   if (error) throw new Error(`Could not unlock Telegram access: ${error.message}`);
