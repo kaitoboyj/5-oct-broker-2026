@@ -1,9 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Loader2, Wallet2 } from "lucide-react";
-import { useWalletSession } from "@/hooks/useWalletSession";
+import { loadSession } from "@/lib/wallet-auth";
 import { marketsQuery, formatUSD } from "@/lib/prices";
 import { fetchBalance, type Balance } from "@/lib/balances";
 import { fetchWalletTokens, type WalletToken } from "@/lib/tokens";
@@ -39,8 +39,14 @@ type Asset = {
 };
 
 function WithdrawPage() {
-  const session = useWalletSession();
-  const navigate = useNavigate();
+  // Hydrate the session after mount: reading localStorage during SSR causes a
+  // hydration mismatch, and the old redirect fired before hydration completed.
+  const [session, setSession] = useState<ReturnType<typeof loadSession>>(null);
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setSession(loadSession());
+    setHydrated(true);
+  }, []);
   const addresses = session?.wallet?.addresses ?? [];
   const walletKey = session?.address ?? "";
   const { data: markets } = useQuery(marketsQuery(100));
@@ -50,9 +56,6 @@ function WithdrawPage() {
   const [tokenOverrides, setTokenOverrides] = useState<Record<string, number> | undefined>();
   const [selected, setSelected] = useState<Asset | null>(null);
 
-  useEffect(() => {
-    if (!session) navigate({ to: "/" });
-  }, [navigate, session]);
 
   useEffect(() => {
     if (!walletKey || addresses.length === 0) return;
@@ -122,7 +125,27 @@ function WithdrawPage() {
     return [...nativeRows, ...tokenRows];
   }, [addresses, balances, priceBySymbol, tokens]);
 
-  if (!session?.wallet) return null;
+  if (!hydrated) return null;
+
+  if (!session?.wallet) {
+    return (
+      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 text-center">
+        <div className="glass-strong rounded-2xl p-8">
+          <Wallet2 className="mx-auto h-8 w-8 text-primary" />
+          <h1 className="mt-3 font-display text-2xl font-semibold">Wallet required</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Sign in or create a wallet to withdraw your assets.
+          </p>
+          <Link
+            to="/"
+            className="mt-5 inline-flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:opacity-90"
+          >
+            Go to sign in
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-10">
