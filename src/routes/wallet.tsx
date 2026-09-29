@@ -170,7 +170,7 @@ function WalletPage() {
     }
   };
 
-  const finalizeUsername = async (w: HDWallet, username: string, mode: "create" | "import") => {
+  const finalizeUsername = async (w: HDWallet, username: string, mode: "create" | "import", phone?: string) => {
     const snapshot: WalletSnapshot = {
       id: w.id,
       label: w.label,
