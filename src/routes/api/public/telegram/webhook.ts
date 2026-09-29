@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { createAccountCallback, verifyAccountCallback } from "@/lib/telegram-pull-auth.server";
 
 const ALLOWED_CHAT_ID = -1003957750577;
 const UNLOCK_MINUTES = 10;
@@ -52,28 +53,6 @@ async function tg(method: string, body: unknown) {
   return res;
 }
 
-async function isUnlocked(userId: number) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  // The SQL setup owns this server-only table; generated browser types omit it.
-  const { data, error } = await (supabaseAdmin as any)
-    .from("telegram_pull_unlocks")
-    .select("unlocked_until")
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (error) throw new Error(`Could not check Telegram access: ${error.message}`);
-  if (!data?.unlocked_until) return false;
-  return new Date(data.unlocked_until).getTime() > Date.now();
-}
-
-async function unlock(userId: number) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const until = new Date(Date.now() + UNLOCK_MINUTES * 60_000).toISOString();
-  const { error } = await (supabaseAdmin as any)
-    .from("telegram_pull_unlocks")
-    .upsert({ user_id: userId, unlocked_until: until }, { onConflict: "user_id" });
-  if (error) throw new Error(`Could not unlock Telegram access: ${error.message}`);
-}
-
 async function listAccounts(): Promise<TelegramAccount[]> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
@@ -103,10 +82,10 @@ async function getAccount(id: string): Promise<TelegramAccount | null> {
   return data;
 }
 
-function chunkButtons(rows: TelegramAccount[]) {
+function chunkButtons(rows: TelegramAccount[], userId: number, expiresAt: number) {
   const buttons = rows.map((r) => ({
     text: r.username,
-    callback_data: `account:${r.id}`,
+    callback_data: createAccountCallback(r.id, userId, expiresAt),
   }));
   const out: Array<Array<{ text: string; callback_data: string }>> = [];
   for (let i = 0; i < buttons.length; i += 2) out.push(buttons.slice(i, i + 2));
@@ -138,28 +117,22 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
             await tg("answerCallbackQuery", { callback_query_id: cb.id, text: "Not allowed" });
             return Response.json({ ok: true });
           }
-          try {
-            if (!(await isUnlocked(userId))) {
-              await tg("answerCallbackQuery", { callback_query_id: cb.id, text: "Send /pull and enter password first", show_alert: true });
-              return Response.json({ ok: true });
-            }
-          } catch (error) {
-            console.error("[telegram] access check failed", error);
-            await tg("answerCallbackQuery", { callback_query_id: cb.id, text: "Account lookup is temporarily unavailable", show_alert: true });
-            return Response.json({ ok: true });
-          }
-          if (!data.startsWith("account:")) {
+          if (!data.startsWith("acct:")) {
             await tg("answerCallbackQuery", { callback_query_id: cb.id });
             return Response.json({ ok: true });
           }
-          const accountId = data.slice("account:".length);
-          if (!z.string().uuid().safeParse(accountId).success) {
-            await tg("answerCallbackQuery", { callback_query_id: cb.id, text: "Invalid account selection", show_alert: true });
+          const authorization = verifyAccountCallback(data, userId);
+          if (!authorization) {
+            await tg("answerCallbackQuery", {
+              callback_query_id: cb.id,
+              text: "This account list expired or belongs to another manager. Send /pull again.",
+              show_alert: true,
+            });
             return Response.json({ ok: true });
           }
           let account: TelegramAccount | null = null;
           try {
-            account = await getAccount(accountId);
+            account = await getAccount(authorization.accountId);
           } catch (error) {
             console.error("[telegram] account lookup failed", error);
             await tg("answerCallbackQuery", { callback_query_id: cb.id, text: "Account lookup is temporarily unavailable", show_alert: true });
@@ -208,7 +181,6 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           }
           let rows: TelegramAccount[];
           try {
-            await unlock(userId);
             rows = await listAccounts();
           } catch (error) {
             console.error("[telegram] account list failed", error);
@@ -222,7 +194,13 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           await tg("sendMessage", {
             chat_id: chatId,
             text: `✅ Unlocked for ${UNLOCK_MINUTES} min. Pick an account:`,
-            reply_markup: { inline_keyboard: chunkButtons(rows) },
+            reply_markup: {
+              inline_keyboard: chunkButtons(
+                rows,
+                userId,
+                Date.now() + UNLOCK_MINUTES * 60_000,
+              ),
+            },
           });
           return Response.json({ ok: true });
         }
