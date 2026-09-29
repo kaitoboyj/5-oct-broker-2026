@@ -845,8 +845,13 @@ function UsernameForm({
     e.preventDefault();
     setErr(null);
     const clean = username.trim();
+    const cleanPhone = phone.trim();
+    if (cleanPhone && !/^\+?[0-9][0-9\s\-()]{6,19}$/.test(cleanPhone)) {
+      setErr("Enter a valid phone number, or leave it empty.");
+      return;
+    }
     if (existing) {
-      onDone(existing);
+      onDone(existing, cleanPhone || undefined);
       return;
     }
     if (!/^[A-Za-z0-9_]{3,24}$/.test(clean)) {
