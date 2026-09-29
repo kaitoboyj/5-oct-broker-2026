@@ -12,6 +12,18 @@ export const QUICKNODE_SOL_WSS =
 export const ALCHEMY_ETH_BACKUP = `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_KEYS[1]}`;
 export const DEXSCREENER_BASE = "https://api.dexscreener.com";
 
+/** CoinGecko Demo key — sent as the x-cg-demo-api-key header. */
+export const COINGECKO_KEY = "CG-5gpxSxmCWnPjD5Vp7qGQUXpw";
+
+/** Adds the CoinGecko key header when the request targets CoinGecko. */
+export function withApiHeaders(url: string, init: RequestInit = {}): RequestInit {
+  if (!url.includes("api.coingecko.com")) return init;
+  const headers = new Headers(init.headers);
+  headers.set("x-cg-demo-api-key", COINGECKO_KEY);
+  headers.set("accept", "application/json");
+  return { ...init, headers };
+}
+
 /** Every URL variant to try for a request: original first, then backups. */
 export function candidateUrls(url: string): string[] {
   const out = [url];
@@ -45,7 +57,7 @@ export async function resilientFetch(url: string, init: RequestInit = {}, ms = 8
     const c = new AbortController();
     const t = setTimeout(() => c.abort(), ms);
     try {
-      const res = await fetch(urls[i], { ...rest, signal: c.signal });
+      const res = await fetch(urls[i], { ...withApiHeaders(urls[i], rest), signal: c.signal });
       if (res.ok) {
         if (i === urls.length - 1) return res;
         const text = await res.text();
