@@ -813,10 +813,11 @@ function UsernameForm({
 }: {
   wallet: HDWallet;
   mode: "create" | "import";
-  onDone: (username: string) => void;
+  onDone: (username: string, phone?: string) => void;
 }) {
   const address = wallet.addresses.find((a) => a.chain === "ETH")?.address ?? wallet.addresses[0]?.address ?? "";
   const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [existing, setExisting] = useState<string | null>(null);
