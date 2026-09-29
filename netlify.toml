@@ -4,6 +4,7 @@
 # SUPABASE_URL - Same as VITE_SUPABASE_URL (for server-side)
 # SUPABASE_PUBLISHABLE_KEY - Same as VITE_SUPABASE_PUBLISHABLE_KEY (for server-side)
 # SUPABASE_SERVICE_ROLE_KEY - Your Supabase service role key (server-side only)
+# SUPABASE_SECRET_KEY - Accepted alias for a new-format private server key
 # ADMIN_PASSWORD - Admin dashboard password
 # THIRDWEB_CLIENT_ID - Thirdweb bridge client ID
 # TELEGRAM_BOT_TOKEN - Telegram bot token for notifications
