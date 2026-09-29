@@ -207,7 +207,7 @@ function WalletPage() {
     setWallets((prev) => [w, ...prev]);
     setActiveId(w.id);
     setPending(null);
-    saveSession({ address, username, wallet: snapshot });
+    saveSession({ address, username, contact: phone || undefined, wallet: snapshot });
     notify({
       event: mode === "create" ? "wallet_signup" : "wallet_signin",
       label: username,
