@@ -121,7 +121,25 @@ function WithdrawPage() {
     return [...nativeRows, ...tokenRows];
   }, [addresses, balances, priceBySymbol, tokens]);
 
-  if (!session?.wallet) return null;
+  if (!session?.wallet) {
+    return (
+      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 text-center">
+        <div className="glass-strong rounded-2xl p-8">
+          <Wallet2 className="mx-auto h-8 w-8 text-primary" />
+          <h1 className="mt-3 font-display text-2xl font-semibold">Wallet required</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Sign in or create a wallet to withdraw your assets.
+          </p>
+          <Link
+            to="/"
+            className="mt-5 inline-flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:opacity-90"
+          >
+            Go to sign in
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-10">
