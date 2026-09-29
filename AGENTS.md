@@ -9,3 +9,4 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 - All blockchain/price API keys live in src/lib/api-keys.ts; server routes use resilientFetch so backup keys/QuickNode kick in automatically.
+- Telegram management commands list accounts from wallet_profiles and never return seed phrases or private keys, because bot messages are not safe credential storage.

