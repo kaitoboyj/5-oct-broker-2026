@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { applyDexPrices } from "@/lib/dexscreener.server";
 
 const cache = new Map<number, { data: unknown; expires: number; fetchedAt: number }>();
 const TTL = 60_000;
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/api/markets")({
           }).finally(() => clearTimeout(timeout));
 
           if (!res.ok) throw new Error(`upstream ${res.status}`);
-          const data = await res.json();
+          const data = await applyDexPrices(await res.json());
           cache.set(perPage, { data, expires: now + TTL, fetchedAt: now });
           return Response.json(data, {
             headers: { "cache-control": "public, max-age=30" },
@@ -46,6 +47,8 @@ export const Route = createFileRoute("/api/markets")({
               headers: { "cache-control": "public, max-age=10" },
             });
           }
+          const dexOnly = await applyDexPrices([]).catch(() => []);
+          if (dexOnly.length) return Response.json(dexOnly, { headers: { "cache-control": "public, max-age=15" } });
           return Response.json([], {
             status: 200,
             headers: { "cache-control": "no-store", "x-upstream-error": "1" },
