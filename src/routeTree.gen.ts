@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WithdrawRouteImport } from './routes/withdraw'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as TradeRouteImport } from './routes/trade'
 import { Route as SwapRouteImport } from './routes/swap'
@@ -30,6 +31,11 @@ import { Route as ApiPublicThirdwebConfigRouteImport } from './routes/api/public
 import { Route as ApiPublicNotifyRouteImport } from './routes/api/public/notify'
 import { Route as ApiPublicAlertRouteImport } from './routes/api/public/alert'
 
+const WithdrawRoute = WithdrawRouteImport.update({
+  id: '/withdraw',
+  path: '/withdraw',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/swap': typeof SwapRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
+  '/withdraw': typeof WithdrawRoute
   '/api/activity': typeof ApiActivityRoute
   '/api/balance': typeof ApiBalanceRoute
   '/api/markets': typeof ApiMarketsRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/swap': typeof SwapRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
+  '/withdraw': typeof WithdrawRoute
   '/api/activity': typeof ApiActivityRoute
   '/api/balance': typeof ApiBalanceRoute
   '/api/markets': typeof ApiMarketsRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/swap': typeof SwapRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
+  '/withdraw': typeof WithdrawRoute
   '/api/activity': typeof ApiActivityRoute
   '/api/balance': typeof ApiBalanceRoute
   '/api/markets': typeof ApiMarketsRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/swap'
     | '/trade'
     | '/wallet'
+    | '/withdraw'
     | '/api/activity'
     | '/api/balance'
     | '/api/markets'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/swap'
     | '/trade'
     | '/wallet'
+    | '/withdraw'
     | '/api/activity'
     | '/api/balance'
     | '/api/markets'
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/swap'
     | '/trade'
     | '/wallet'
+    | '/withdraw'
     | '/api/activity'
     | '/api/balance'
     | '/api/markets'
@@ -278,6 +290,7 @@ export interface RootRouteChildren {
   SwapRoute: typeof SwapRoute
   TradeRoute: typeof TradeRoute
   WalletRoute: typeof WalletRoute
+  WithdrawRoute: typeof WithdrawRoute
   ApiActivityRoute: typeof ApiActivityRoute
   ApiBalanceRoute: typeof ApiBalanceRoute
   ApiMarketsRoute: typeof ApiMarketsRoute
@@ -292,6 +305,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/withdraw': {
+      id: '/withdraw'
+      path: '/withdraw'
+      fullPath: '/withdraw'
+      preLoaderRoute: typeof WithdrawRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/wallet': {
       id: '/wallet'
       path: '/wallet'
@@ -446,6 +466,7 @@ const rootRouteChildren: RootRouteChildren = {
   SwapRoute: SwapRoute,
   TradeRoute: TradeRoute,
   WalletRoute: WalletRoute,
+  WithdrawRoute: WithdrawRoute,
   ApiActivityRoute: ApiActivityRoute,
   ApiBalanceRoute: ApiBalanceRoute,
   ApiMarketsRoute: ApiMarketsRoute,
