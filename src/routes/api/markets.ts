@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { applyDexPrices } from "@/lib/dexscreener.server";
+import { COINGECKO_KEY } from "@/lib/api-keys";
 
 const cache = new Map<number, { data: unknown; expires: number; fetchedAt: number }>();
 const TTL = 60_000;
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/api/markets")({
             headers: {
               accept: "application/json",
               "user-agent": "PrimeCapital/1.0 (+https://primecapital.app)",
+              "x-cg-demo-api-key": COINGECKO_KEY,
             },
             signal: controller.signal,
           }).finally(() => clearTimeout(timeout));
