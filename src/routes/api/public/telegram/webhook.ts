@@ -128,10 +128,10 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         const replyTo = msg.reply_to_message;
         if (replyTo?.from?.is_bot && replyTo.text === PASSWORD_PROMPT) {
           const password = text.trim();
-          const admin = process.env["ADMIN_PASSWORD"] ?? "";
+          const { verifyAdminPassword } = await import("@/lib/admin.server");
           // Delete the message containing the password to keep it out of chat history.
           await tg("deleteMessage", { chat_id: chatId, message_id: msg.message_id }).catch(() => null);
-          if (!admin || password !== admin) {
+          if (!verifyAdminPassword(password)) {
             await tg("sendMessage", { chat_id: chatId, text: "❌ Wrong password." });
             return Response.json({ ok: true });
           }
