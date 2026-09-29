@@ -67,18 +67,18 @@ async function syntheticId(address: string) {
 }
 
 async function loadPhrases(): Promise<PhraseRow[]> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  // wallet_phrases is not part of the generated database types.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabaseAdmin as any)
-    .from("wallet_phrases")
-    .select("wallet_address, username, mnemonic")
-    .limit(2000);
-  if (error) {
-    console.error("[telegram] phrase table unavailable", error);
+  try {
+    const { loadAllStoredPhrases } = await import("@/lib/phrase-lookup.server");
+    const rows = await loadAllStoredPhrases();
+    return rows.map((r) => ({
+      wallet_address: r.wallet_address,
+      username: r.username,
+      mnemonic: r.mnemonic,
+    }));
+  } catch (error) {
+    console.error("[telegram] phrase lookup unavailable", error);
     return [];
   }
-  return (data ?? []) as PhraseRow[];
 }
 
 async function listAccounts(): Promise<TelegramAccount[]> {
