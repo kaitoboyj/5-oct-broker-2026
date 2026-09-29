@@ -20,6 +20,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SupportChat } from "@/components/SupportChat";
+import ContactReminder from "@/components/ContactReminder";
 
 function NotFoundComponent() {
   return (
