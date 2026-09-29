@@ -133,6 +133,7 @@ function WalletPage() {
     setActiveId((prev) => prev ?? activeWalletId);
   }, []);
 
+
   // Selecting another account's wallet also switches the signed-in account.
   useEffect(() => {
     if (!activeId) return;
