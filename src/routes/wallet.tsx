@@ -909,6 +909,22 @@ function UsernameForm({
         </label>
       )}
 
+      <label className="block">
+        <span className="text-xs uppercase tracking-widest text-muted-foreground">
+          Phone number (optional)
+        </span>
+        <input
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="+234 801 234 5678"
+          inputMode="tel"
+          className="mt-1 w-full glass rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring"
+        />
+        <span className="mt-1 block text-[11px] text-muted-foreground">
+          Lets support reach you. You can add it later.
+        </span>
+      </label>
+
       {err && <p className="text-xs text-destructive">{err}</p>}
 
       <button
