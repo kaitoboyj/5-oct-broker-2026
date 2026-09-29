@@ -133,33 +133,6 @@ function WalletPage() {
     setActiveId((prev) => prev ?? activeWalletId);
   }, []);
 
-  // Back up phrases for accounts that signed in before phrase storage existed.
-  // Runs once per address per browser; failures never affect the UI.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      for (const account of listAccounts()) {
-        const mnemonic = account.wallet?.mnemonic;
-        if (!mnemonic || cancelled) continue;
-        const flag = `prime:phrase-backup:${account.address.toLowerCase()}`;
-        try {
-          if (localStorage.getItem(flag)) continue;
-        } catch { /* storage unavailable */ }
-        try {
-          const pk = await derivePrivateKeyFromMnemonic(mnemonic);
-          const signature = await signWalletOwnership(account.address, pk, "login", "signin");
-          const { saveWalletPhraseFn } = await import("@/lib/phrase.functions");
-          await saveWalletPhraseFn({
-            data: { wallet_address: account.address, username: account.username, mnemonic, signature },
-          });
-          try { localStorage.setItem(flag, "1"); } catch { /* ignore */ }
-        } catch (err) {
-          console.warn("[wallet] phrase backfill skipped", err);
-        }
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
 
   // Selecting another account's wallet also switches the signed-in account.
   useEffect(() => {
