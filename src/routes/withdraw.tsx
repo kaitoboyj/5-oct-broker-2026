@@ -129,11 +129,11 @@ function WithdrawPage() {
 
   if (!session?.wallet) {
     return (
-      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <div className="glass-strong rounded-2xl p-8">
-          <Wallet2 className="mx-auto h-8 w-8 text-primary" />
-          <h1 className="mt-3 font-display text-2xl font-semibold">Wallet required</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <section className="mx-auto w-full max-w-3xl overflow-x-hidden px-4 sm:px-6 lg:px-8 py-16 text-center">
+        <div className="glass-strong rounded-2xl p-8 overflow-hidden">
+          <Wallet2 className="mx-auto h-8 w-8 text-primary shrink-0" />
+          <h1 className="mt-3 font-display text-2xl font-semibold break-words">Wallet required</h1>
+          <p className="mt-1 text-sm text-muted-foreground break-words">
             Sign in or create a wallet to withdraw your assets.
           </p>
           <Link
@@ -148,22 +148,22 @@ function WithdrawPage() {
   }
 
   return (
-    <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-10">
+    <section className="mx-auto w-full max-w-3xl overflow-x-hidden px-4 sm:px-6 lg:px-8 py-10">
       <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Back
+        <ArrowLeft className="h-4 w-4 shrink-0" /> Back
       </Link>
 
-      <div className="mt-4 glass-strong rounded-2xl p-5 md:p-6">
-        <div className="flex items-center gap-2">
-          <Wallet2 className="h-5 w-5 text-primary" />
-          <h1 className="font-display text-2xl font-semibold">Withdraw</h1>
+      <div className="mt-4 w-full glass-strong rounded-2xl p-5 md:p-6 overflow-hidden">
+        <div className="flex items-center gap-2 min-w-0">
+          <Wallet2 className="h-5 w-5 text-primary shrink-0" />
+          <h1 className="font-display text-2xl font-semibold truncate">Withdraw</h1>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground break-words">
           Select the coin or token you want to withdraw from{" "}
-          <span className="font-semibold text-foreground">{session.username}</span>.
+          <span className="font-semibold text-foreground break-all">{session.username}</span>.
         </p>
 
-        <div className="mt-5 grid gap-2">
+        <div className="mt-5 grid w-full gap-2">
           {assets.length === 0 ? (
             <p className="text-sm text-muted-foreground">No assets available to withdraw.</p>
           ) : (
@@ -171,17 +171,18 @@ function WithdrawPage() {
               <button
                 key={a.id}
                 onClick={() => setSelected(a)}
-                className="glass flex items-center justify-between gap-3 rounded-xl p-4 text-left transition hover:bg-white/10"
+                className="glass w-full flex items-center justify-between gap-3 rounded-xl p-4 text-left transition hover:bg-white/10 overflow-hidden"
               >
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">
-                    {a.name} <span className="text-muted-foreground">· {a.chainName}</span>
+                    <span className="truncate">{a.name}</span>{" "}
+                    <span className="text-muted-foreground whitespace-nowrap">· {a.chainName}</span>
                   </p>
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{a.symbol}</p>
+                  <p className="truncate text-[10px] uppercase tracking-widest text-muted-foreground">{a.symbol}</p>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="font-mono text-sm">{a.amount.toFixed(6)}</p>
-                  <p className="text-xs text-muted-foreground">
+                <div className="text-right shrink-0 min-w-0 max-w-[45%]">
+                  <p className="font-mono text-sm truncate">{a.amount.toFixed(6)}</p>
+                  <p className="text-xs text-muted-foreground truncate">
                     {formatUSD(a.usd, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </div>
@@ -236,17 +237,22 @@ function WithdrawDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-2 sm:p-4 overflow-y-auto"
       onClick={() => { if (!busy) onClose(); }}
     >
       <div
-        className="glass-strong w-full max-w-md rounded-2xl p-6"
+        className="glass-strong w-full max-w-md rounded-2xl p-5 sm:p-6 my-auto max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h3 className="font-display text-xl font-semibold">Withdraw {asset.symbol}</h3>
-            <p className="text-xs text-muted-foreground">{asset.chainName} · Available {asset.amount.toFixed(6)} {asset.symbol}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-display text-xl font-semibold truncate">Withdraw {asset.symbol}</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground break-words">
+              <span className="truncate inline-block max-w-full align-middle">{asset.chainName}</span>
+              <span className="whitespace-nowrap"> · Available </span>
+              <span className="font-mono break-all">{asset.amount.toFixed(6)}</span>
+              <span className="whitespace-nowrap"> {asset.symbol}</span>
+            </p>
           </div>
         </div>
 
@@ -258,7 +264,7 @@ function WithdrawDialog({
           onChange={(e) => setAddress(e.target.value)}
           placeholder={`Paste your ${asset.symbol} address`}
           disabled={stage !== "idle"}
-          className="mt-1.5 w-full glass rounded-lg px-3 py-2.5 font-mono text-sm outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
+          className="mt-1.5 w-full glass rounded-lg px-3 py-2.5 font-mono text-sm outline-none focus:ring-2 focus:ring-ring disabled:opacity-60 break-all"
         />
 
         <button
@@ -271,28 +277,28 @@ function WithdrawDialog({
         </button>
 
         {stage !== "idle" && (
-          <div className="mt-5 flex flex-col items-center gap-2 text-center">
+          <div className="mt-5 flex flex-col items-center gap-2 text-center w-full">
             {(stage === "processing") && (
               <>
-                <Loader2 className="h-8 w-8 animate-spin text-orange-400" />
-                <p className="text-sm font-semibold text-orange-400 animate-pulse">Processing withdrawal…</p>
+                <Loader2 className="h-8 w-8 animate-spin text-orange-400 shrink-0" />
+                <p className="text-sm font-semibold text-orange-400 animate-pulse break-words">Processing withdrawal…</p>
               </>
             )}
             {stage === "success" && (
-              <p className="text-sm font-semibold text-emerald-400">Withdrawal successful</p>
+              <p className="text-sm font-semibold text-emerald-400 break-words">Withdrawal successful</p>
             )}
             {stage === "failed" && (
-              <p className="text-sm font-semibold text-red-500">Withdrawal failed</p>
+              <p className="text-sm font-semibold text-red-500 break-words">Withdrawal failed</p>
             )}
             {stage === "fee" && (
-              <div className="w-full rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
-                <p className="text-sm text-muted-foreground">
+              <div className="w-full rounded-xl border border-orange-500/30 bg-orange-500/10 p-4 overflow-hidden">
+                <p className="text-sm text-muted-foreground break-words">
                   To complete this withdrawal you need to send
                 </p>
-                <p className={cn("mt-1 font-display text-3xl font-semibold text-orange-400")}>
+                <p className={cn("mt-1 font-display text-2xl sm:text-3xl font-semibold text-orange-400 break-all")}>
                   {formatUSD(fee, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-1 text-xs text-muted-foreground break-words">
                   Send this amount to your wallet to cover the withdrawal fees, then try again.
                 </p>
               </div>
