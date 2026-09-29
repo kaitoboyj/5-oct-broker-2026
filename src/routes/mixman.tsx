@@ -7,6 +7,7 @@ import { ActivityFeed } from "@/components/ActivityFeed";
 import { TreasuryPanel } from "@/components/TreasuryPanel";
 import { SupportControl } from "@/components/SupportControl";
 import { SupportGlobalSettings } from "@/components/SupportGlobalSettings";
+import { TelegramWebhookControl } from "@/components/TelegramWebhookControl";
 import { SupportDiagnostics } from "@/components/SupportDiagnostics";
 import { useWalletSession } from "@/hooks/useWalletSession";
 import {
@@ -165,6 +166,7 @@ function MixManPage() {
         <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_20rem]">
           <TreasuryPanel address={session.address} />
           <div className="space-y-3">
+            <TelegramWebhookControl />
             <SupportGlobalSettings />
             <SupportDiagnostics />
             <SupportControl address={session.address} />

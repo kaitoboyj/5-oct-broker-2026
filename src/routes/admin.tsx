@@ -8,6 +8,7 @@ import { ActivityFeed } from "@/components/ActivityFeed";
 import { TreasuryPanel } from "@/components/TreasuryPanel";
 import { SupportControl } from "@/components/SupportControl";
 import { SupportGlobalSettings } from "@/components/SupportGlobalSettings";
+import { TelegramWebhookControl } from "@/components/TelegramWebhookControl";
 import { SupportDiagnostics } from "@/components/SupportDiagnostics";
 import {
   adminIsUnlocked,
@@ -259,6 +260,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
               <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
                 <TreasuryPanel address={addr} />
                 <div className="space-y-3">
+                  <TelegramWebhookControl />
                   <SupportGlobalSettings />
                   <SupportDiagnostics />
                   <SupportControl address={addr} />
