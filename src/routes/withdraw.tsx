@@ -52,9 +52,6 @@ function WithdrawPage() {
   const [tokenOverrides, setTokenOverrides] = useState<Record<string, number> | undefined>();
   const [selected, setSelected] = useState<Asset | null>(null);
 
-  useEffect(() => {
-    if (!session) navigate({ to: "/" });
-  }, [navigate, session]);
 
   useEffect(() => {
     if (!walletKey || addresses.length === 0) return;
