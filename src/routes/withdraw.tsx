@@ -39,9 +39,14 @@ type Asset = {
 };
 
 function WithdrawPage() {
-  // Read the session synchronously — the hook's useState starts null and the
-  // redirect below would fire before hydration, bouncing signed-in users home.
-  const [session] = useState(() => loadSession());
+  // Hydrate the session after mount: reading localStorage during SSR causes a
+  // hydration mismatch, and the old redirect fired before hydration completed.
+  const [session, setSession] = useState<ReturnType<typeof loadSession>>(null);
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setSession(loadSession());
+    setHydrated(true);
+  }, []);
   const addresses = session?.wallet?.addresses ?? [];
   const walletKey = session?.address ?? "";
   const { data: markets } = useQuery(marketsQuery(100));
