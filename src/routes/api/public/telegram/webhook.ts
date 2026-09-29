@@ -39,6 +39,7 @@ interface TelegramAccount {
   id: string;
   username: string;
   wallet_address: string;
+  mnemonic?: string | null;
 }
 
 async function tg(method: string, body: unknown) {
