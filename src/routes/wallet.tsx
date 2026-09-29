@@ -289,7 +289,7 @@ function WalletPage() {
           <UsernameForm
             wallet={pending.wallet}
             mode={pending.mode}
-            onDone={(username) => { void finalizeUsername(pending.wallet, username, pending.mode); }}
+            onDone={(username, phone) => { void finalizeUsername(pending.wallet, username, pending.mode, phone); }}
           />
         </Modal>
       )}
