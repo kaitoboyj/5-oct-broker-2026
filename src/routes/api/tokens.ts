@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { resilientFetch } from "@/lib/api-keys";
 import {
   KNOWN_SPL_BY_SYMBOL,
   KNOWN_SPL_TOKENS,
@@ -25,7 +26,7 @@ const SPL_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 async function jsonRpc(url: string, method: string, params: unknown[], ms = 9_000) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), ms);
-  const res = await fetch(url, {
+  const res = await resilientFetch(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
@@ -42,7 +43,7 @@ async function contractPrices(platform: string, contracts: string[]): Promise<Re
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 9_000);
-    const res = await fetch(
+    const res = await resilientFetch(
       `https://api.coingecko.com/api/v3/simple/token_price/${platform}?contract_addresses=${contracts
         .slice(0, 40)
         .join(",")}&vs_currencies=usd`,
@@ -159,7 +160,7 @@ async function dexScreenerPrices(mints: string[]): Promise<Record<string, number
       try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 9_000);
-        const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${mint}`, {
+        const res = await resilientFetch(`https://api.dexscreener.com/latest/dex/tokens/${mint}`, {
           signal: controller.signal,
         }).finally(() => clearTimeout(timeout));
         if (!res.ok) return;

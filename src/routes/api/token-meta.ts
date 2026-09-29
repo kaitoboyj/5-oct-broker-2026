@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { resilientFetch } from "@/lib/api-keys";
 import { KNOWN_SPL_TOKENS, TOKEN_CHAINS, normalizeChain, type TokenChain } from "@/lib/tokens";
 
 const ALCHEMY_KEY = "4ktChsUHziUE8O7iKgSBY";
@@ -27,7 +28,7 @@ async function getJson(url: string, init?: RequestInit): Promise<any> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TIMEOUT);
   try {
-    const res = await fetch(url, { ...init, signal: controller.signal });
+    const res = await resilientFetch(url, { ...init, signal: controller.signal });
     if (!res.ok) return null;
     return await res.json();
   } catch {

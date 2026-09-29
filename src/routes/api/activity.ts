@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { resilientFetch } from "@/lib/api-keys";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // On-chain activity (transaction history) for a single address on one chain.
@@ -47,7 +48,7 @@ async function jfetch(url: string, init?: RequestInit, ms = 9_000) {
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), ms);
   try {
-    const res = await fetch(url, { ...init, signal: c.signal });
+    const res = await resilientFetch(url, { ...init, signal: c.signal });
     if (!res.ok) throw new Error(`${url} -> ${res.status}`);
     return await res.json();
   } finally {
