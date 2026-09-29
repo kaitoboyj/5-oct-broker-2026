@@ -869,7 +869,7 @@ function UsernameForm({
       const pk = await derivePrivateKeyFromMnemonic(wallet.mnemonic);
       const signature = await signWalletOwnership(address, pk, "register", clean);
       const row = await registerWalletProfile(address, clean, signature);
-      onDone(row.username);
+      onDone(row.username, cleanPhone || undefined);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Failed to register username");
       setBusy(false);
