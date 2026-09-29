@@ -10,7 +10,7 @@
 # (Alchemy, Covalent, QuickNode keys live in src/lib/api-keys.ts - no Netlify setup needed)
 
 [build]
-command = "npm run build"
+command = "npm run build && node scripts/register-telegram-webhook.mjs"
 publish = "dist"
 
 [build.environment]
