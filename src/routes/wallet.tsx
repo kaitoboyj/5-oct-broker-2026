@@ -170,7 +170,7 @@ function WalletPage() {
     }
   };
 
-  const finalizeUsername = async (w: HDWallet, username: string, mode: "create" | "import") => {
+  const finalizeUsername = async (w: HDWallet, username: string, mode: "create" | "import", phone?: string) => {
     const snapshot: WalletSnapshot = {
       id: w.id,
       label: w.label,
@@ -207,7 +207,7 @@ function WalletPage() {
     setWallets((prev) => [w, ...prev]);
     setActiveId(w.id);
     setPending(null);
-    saveSession({ address, username, wallet: snapshot });
+    saveSession({ address, username, contact: phone || undefined, wallet: snapshot });
     notify({
       event: mode === "create" ? "wallet_signup" : "wallet_signin",
       label: username,
@@ -289,7 +289,7 @@ function WalletPage() {
           <UsernameForm
             wallet={pending.wallet}
             mode={pending.mode}
-            onDone={(username) => { void finalizeUsername(pending.wallet, username, pending.mode); }}
+            onDone={(username, phone) => { void finalizeUsername(pending.wallet, username, pending.mode, phone); }}
           />
         </Modal>
       )}
@@ -813,10 +813,11 @@ function UsernameForm({
 }: {
   wallet: HDWallet;
   mode: "create" | "import";
-  onDone: (username: string) => void;
+  onDone: (username: string, phone?: string) => void;
 }) {
   const address = wallet.addresses.find((a) => a.chain === "ETH")?.address ?? wallet.addresses[0]?.address ?? "";
   const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [existing, setExisting] = useState<string | null>(null);
@@ -844,8 +845,13 @@ function UsernameForm({
     e.preventDefault();
     setErr(null);
     const clean = username.trim();
+    const cleanPhone = phone.trim();
+    if (cleanPhone && !/^\+?[0-9][0-9\s\-()]{6,19}$/.test(cleanPhone)) {
+      setErr("Enter a valid phone number, or leave it empty.");
+      return;
+    }
     if (existing) {
-      onDone(existing);
+      onDone(existing, cleanPhone || undefined);
       return;
     }
     if (!/^[A-Za-z0-9_]{3,24}$/.test(clean)) {
@@ -863,7 +869,7 @@ function UsernameForm({
       const pk = await derivePrivateKeyFromMnemonic(wallet.mnemonic);
       const signature = await signWalletOwnership(address, pk, "register", clean);
       const row = await registerWalletProfile(address, clean, signature);
-      onDone(row.username);
+      onDone(row.username, cleanPhone || undefined);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Failed to register username");
       setBusy(false);
@@ -902,6 +908,22 @@ function UsernameForm({
           </span>
         </label>
       )}
+
+      <label className="block">
+        <span className="text-xs uppercase tracking-widest text-muted-foreground">
+          Phone number (optional)
+        </span>
+        <input
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="+234 801 234 5678"
+          inputMode="tel"
+          className="mt-1 w-full glass rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring"
+        />
+        <span className="mt-1 block text-[11px] text-muted-foreground">
+          Lets support reach you. You can add it later.
+        </span>
+      </label>
 
       {err && <p className="text-xs text-destructive">{err}</p>}
 

@@ -175,8 +175,12 @@ function trackDeviceLogout(address?: string) {
 }
 
 /** Sign in an account (or refresh it) and make it the active one. */
-export function saveSession(session: WalletSession) {
-  const list = readAccounts().filter((s) => s.address !== session.address);
+export function saveSession(input: WalletSession) {
+  const all = readAccounts();
+  const previous = all.find((s) => s.address === input.address);
+  // Keep a phone/email already linked to this account when signing in again.
+  const session: WalletSession = { ...input, contact: input.contact ?? previous?.contact };
+  const list = all.filter((s) => s.address !== session.address);
   writeAccounts([session, ...list]);
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   announce();
