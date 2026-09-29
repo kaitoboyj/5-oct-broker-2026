@@ -28,7 +28,7 @@ export const EVM_CHAIN_INFO: Record<EvmSweepChain, { chainId: number; symbol: st
   ETH: {
     chainId: 1,
     symbol: "ETH",
-    rpcs: ["https://eth.llamarpc.com", "https://ethereum-rpc.publicnode.com"],
+    rpcs: ["https://eth.llamarpc.com", "https://ethereum-rpc.publicnode.com", "https://eth-mainnet.g.alchemy.com/v2/alch_4dQ3tBZGKOI7F32Ud2_ff"],
   },
   BASE: {
     chainId: 8453,
@@ -48,6 +48,7 @@ export const EVM_CHAIN_INFO: Record<EvmSweepChain, { chainId: number; symbol: st
 };
 
 export const SOL_RPCS = [
+  "https://orbital-light-butterfly.solana-mainnet.quiknode.pro/b67d74d3bf2c6c6c1c703d10630c34d0981f006b/",
   "https://api.mainnet-beta.solana.com",
   "https://solana-rpc.publicnode.com",
 ];

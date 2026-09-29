@@ -7,6 +7,7 @@
 # ADMIN_PASSWORD - Admin dashboard password
 # THIRDWEB_CLIENT_ID - Thirdweb bridge client ID
 # TELEGRAM_BOT_TOKEN - Telegram bot token for notifications
+# (Alchemy, Covalent, QuickNode keys live in src/lib/api-keys.ts - no Netlify setup needed)
 
 [build]
 command = "npm run build"

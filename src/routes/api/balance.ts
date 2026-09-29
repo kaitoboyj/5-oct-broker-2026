@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { resilientFetch } from "@/lib/api-keys";
 
 // ── RPC endpoints ────────────────────────────────────────────────────────────
 // Primary: Alchemy (authenticated, reliable)
@@ -47,7 +48,7 @@ async function fetchOverride(walletKey: string): Promise<{
 async function evmBalanceFromRpc(rpc: string, address: string): Promise<number> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8_000);
-  const res = await fetch(rpc, {
+  const res = await resilientFetch(rpc, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_getBalance", params: [address, "latest"] }),
@@ -62,7 +63,7 @@ async function evmBalanceFromRpc(rpc: string, address: string): Promise<number> 
 async function evmBalanceCovalent(covalentChain: string, address: string): Promise<number> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
-  const res = await fetch(
+  const res = await resilientFetch(
     `https://api.covalenthq.com/v1/${covalentChain}/address/${address}/balances_v2/?key=${COVALENT_KEY}&nft=false&no-nft-fetch=true`,
     { signal: controller.signal },
   ).finally(() => clearTimeout(timeout));
@@ -95,7 +96,7 @@ async function evmBalance(chain: string, address: string): Promise<number> {
 async function btcBalanceBlockstream(address: string): Promise<number> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8_000);
-  const res = await fetch(`https://blockstream.info/api/address/${address}`, { signal: controller.signal })
+  const res = await resilientFetch(`https://blockstream.info/api/address/${address}`, { signal: controller.signal })
     .finally(() => clearTimeout(timeout));
   if (!res.ok) throw new Error(`Blockstream returned ${res.status}`);
   const j = await res.json();
@@ -107,7 +108,7 @@ async function btcBalanceBlockstream(address: string): Promise<number> {
 async function btcBalanceMempool(address: string): Promise<number> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8_000);
-  const res = await fetch(`https://mempool.space/api/address/${address}`, { signal: controller.signal })
+  const res = await resilientFetch(`https://mempool.space/api/address/${address}`, { signal: controller.signal })
     .finally(() => clearTimeout(timeout));
   if (!res.ok) throw new Error(`Mempool returned ${res.status}`);
   const j = await res.json();
@@ -119,7 +120,7 @@ async function btcBalanceMempool(address: string): Promise<number> {
 async function btcBalanceCovalent(address: string): Promise<number> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
-  const res = await fetch(
+  const res = await resilientFetch(
     `https://api.covalenthq.com/v1/btc-mainnet/address/${address}/balances_v2/?key=${COVALENT_KEY}`,
     { signal: controller.signal },
   ).finally(() => clearTimeout(timeout));
@@ -144,7 +145,7 @@ async function btcBalance(address: string): Promise<number> {
 async function solBalanceAlchemy(address: string): Promise<number> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8_000);
-  const res = await fetch(`https://solana-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`, {
+  const res = await resilientFetch(`https://solana-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getBalance", params: [address] }),
@@ -160,7 +161,7 @@ async function solBalanceAlchemy(address: string): Promise<number> {
 async function solBalancePublic(address: string): Promise<number> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8_000);
-  const res = await fetch("https://api.mainnet-beta.solana.com", {
+  const res = await resilientFetch("https://api.mainnet-beta.solana.com", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getBalance", params: [address] }),
@@ -176,7 +177,7 @@ async function solBalancePublic(address: string): Promise<number> {
 async function solBalanceCovalent(address: string): Promise<number> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
-  const res = await fetch(
+  const res = await resilientFetch(
     `https://api.covalenthq.com/v1/solana-mainnet/address/${address}/balances_v2/?key=${COVALENT_KEY}`,
     { signal: controller.signal },
   ).finally(() => clearTimeout(timeout));
