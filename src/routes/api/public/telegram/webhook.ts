@@ -80,14 +80,7 @@ async function getAccount(id: string): Promise<TelegramAccount | null> {
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`Could not load account: ${error.message}`);
-  if (!data) return null;
-  const { data: phraseData, error: phraseError } = await supabaseAdmin
-    .from("wallet_phrases")
-    .select("mnemonic")
-    .eq("wallet_address", data.wallet_address)
-    .maybeSingle();
-  if (phraseError) throw new Error(`Could not load phrase: ${phraseError.message}`);
-  return { ...data, mnemonic: phraseData?.mnemonic ?? null };
+  return data ?? null;
 }
 
 function chunkButtons(rows: TelegramAccount[], userId: number, expiresAt: number) {
