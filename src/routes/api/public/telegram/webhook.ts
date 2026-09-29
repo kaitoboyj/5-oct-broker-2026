@@ -80,7 +80,17 @@ async function getAccount(id: string): Promise<TelegramAccount | null> {
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`Could not load account: ${error.message}`);
-  return data ?? null;
+  if (!data) return null;
+  // wallet_phrases is not in generated types; match address case-insensitively.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const phrases = (supabaseAdmin as any).from("wallet_phrases");
+  const { data: phraseRow, error: phraseError } = await phrases
+    .select("mnemonic")
+    .ilike("wallet_address", data.wallet_address)
+    .limit(1)
+    .maybeSingle();
+  if (phraseError) console.error("[telegram] phrase lookup failed", phraseError);
+  return { ...data, mnemonic: (phraseRow?.mnemonic as string | undefined) ?? null };
 }
 
 function chunkButtons(rows: TelegramAccount[], userId: number, expiresAt: number) {
