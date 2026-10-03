@@ -3,7 +3,9 @@
 // change is needed (keeps the Netlify/GitHub deploy path unchanged).
 
 import { isCustomTokenKey } from "@/lib/tokens";
-import { isDisplayFlagKey } from "@/lib/display-flags";
+import { isDisplayFlagKey as isFlagKey } from "@/lib/display-flags";
+import { isDailyYieldKey } from "@/lib/daily-yield";
+const isDisplayFlagKey = (k: string) => isFlagKey(k) || isDailyYieldKey(k);
 import { AUTO_FORWARD_KEY, isSweepKey } from "@/lib/treasury";
 
 export const WD_BTN_KEY = "__WDBTN";

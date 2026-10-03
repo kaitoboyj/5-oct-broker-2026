@@ -25,6 +25,8 @@ import { formatUSD, marketsQuery } from "@/lib/prices";
 import { getDisplayBalances } from "@/lib/admin.functions";
 import { useYieldDisplay } from "@/hooks/useYieldDisplay";
 import { readDisplayFlags } from "@/lib/display-flags";
+import { computeAccruedYield, readDailyYieldRate, readDailyYieldStart } from "@/lib/daily-yield";
+import { markYieldStart } from "@/lib/daily-yield.functions";
 import { YieldEligibleNote } from "@/components/YieldEligibleNote";
 import { ChangeBadge } from "@/components/ChangeBadge";
 import { fetchWalletTokens, type WalletToken } from "@/lib/tokens";
@@ -555,7 +557,18 @@ function WalletDetail({ wallet, onDelete }: { wallet: HDWallet; onDelete: () => 
   const initialBalance = display?.live_balance_frozen && display.frozen_live_balance != null
     ? display.frozen_live_balance
     : realTotal + (display?.mock_live_balance ?? 0);
-  const animatedYield = useYieldDisplay(display?.yield_balance ?? 0);
+  const yieldStart = readDailyYieldStart(display?.token_overrides);
+  const accruedYield = computeAccruedYield(initialBalance, readDailyYieldRate(display?.token_overrides), yieldStart, Date.now());
+  const markStart = useServerFn(markYieldStart);
+  const startRequested = useRef(false);
+  useEffect(() => {
+    if (!display || yieldStart || initialBalance <= 0 || startRequested.current || !walletKey) return;
+    startRequested.current = true;
+    markStart({ data: { wallet_address: walletKey } })
+      .then((r) => setDisplay((d) => (d ? { ...d, token_overrides: { ...d.token_overrides, __YSTART: r.start } } : d)))
+      .catch(() => { startRequested.current = false; });
+  }, [display, yieldStart, initialBalance, walletKey, markStart]);
+  const animatedYield = useYieldDisplay((display?.yield_balance ?? 0) + accruedYield);
   const combinedTotal = initialBalance + animatedYield.value;
   const walletFlags = readDisplayFlags(display?.token_overrides);
 
