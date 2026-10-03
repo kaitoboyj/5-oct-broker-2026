@@ -9,72 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as HowItWorksRouteImport } from './routes/how-it-works'
-import { Route as MarketsRouteImport } from './routes/markets'
-import { Route as MixmanRouteImport } from './routes/mixman'
-import { Route as NewsRouteImport } from './routes/news'
-import { Route as SupportInboxRouteImport } from './routes/support-inbox'
-import { Route as SwapRouteImport } from './routes/swap'
-import { Route as TradeRouteImport } from './routes/trade'
-import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as WithdrawRouteImport } from './routes/withdraw'
-import { Route as ApiActivityRouteImport } from './routes/api/activity'
-import { Route as ApiBalanceRouteImport } from './routes/api/balance'
-import { Route as ApiMarketsRouteImport } from './routes/api/markets'
-import { Route as ApiNewsRouteImport } from './routes/api/news'
-import { Route as ApiTokenMetaRouteImport } from './routes/api/token-meta'
+import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as TradeRouteImport } from './routes/trade'
+import { Route as SwapRouteImport } from './routes/swap'
+import { Route as SupportInboxRouteImport } from './routes/support-inbox'
+import { Route as NewsRouteImport } from './routes/news'
+import { Route as MixmanRouteImport } from './routes/mixman'
+import { Route as MarketsRouteImport } from './routes/markets'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTokensRouteImport } from './routes/api/tokens'
-import { Route as ApiPublicAlertRouteImport } from './routes/api/public/alert'
-import { Route as ApiPublicNotifyRouteImport } from './routes/api/public/notify'
-import { Route as ApiPublicThirdwebConfigRouteImport } from './routes/api/public/thirdweb-config'
+import { Route as ApiTokenMetaRouteImport } from './routes/api/token-meta'
+import { Route as ApiNewsRouteImport } from './routes/api/news'
+import { Route as ApiMarketsRouteImport } from './routes/api/markets'
+import { Route as ApiBalanceRouteImport } from './routes/api/balance'
+import { Route as ApiActivityRouteImport } from './routes/api/activity'
 import { Route as ApiPublicVisitRouteImport } from './routes/api/public/visit'
+import { Route as ApiPublicThirdwebConfigRouteImport } from './routes/api/public/thirdweb-config'
+import { Route as ApiPublicNotifyRouteImport } from './routes/api/public/notify'
+import { Route as ApiPublicAlertRouteImport } from './routes/api/public/alert'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HowItWorksRoute = HowItWorksRouteImport.update({
-  id: '/how-it-works',
-  path: '/how-it-works',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketsRoute = MarketsRouteImport.update({
-  id: '/markets',
-  path: '/markets',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MixmanRoute = MixmanRouteImport.update({
-  id: '/mixman',
-  path: '/mixman',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewsRoute = NewsRouteImport.update({
-  id: '/news',
-  path: '/news',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SupportInboxRoute = SupportInboxRouteImport.update({
-  id: '/support-inbox',
-  path: '/support-inbox',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SwapRoute = SwapRouteImport.update({
-  id: '/swap',
-  path: '/swap',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TradeRoute = TradeRouteImport.update({
-  id: '/trade',
-  path: '/trade',
+const WithdrawRoute = WithdrawRouteImport.update({
+  id: '/withdraw',
+  path: '/withdraw',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WalletRoute = WalletRouteImport.update({
@@ -82,34 +42,49 @@ const WalletRoute = WalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WithdrawRoute = WithdrawRouteImport.update({
-  id: '/withdraw',
-  path: '/withdraw',
+const TradeRoute = TradeRouteImport.update({
+  id: '/trade',
+  path: '/trade',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiActivityRoute = ApiActivityRouteImport.update({
-  id: '/api/activity',
-  path: '/api/activity',
+const SwapRoute = SwapRouteImport.update({
+  id: '/swap',
+  path: '/swap',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiBalanceRoute = ApiBalanceRouteImport.update({
-  id: '/api/balance',
-  path: '/api/balance',
+const SupportInboxRoute = SupportInboxRouteImport.update({
+  id: '/support-inbox',
+  path: '/support-inbox',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiMarketsRoute = ApiMarketsRouteImport.update({
-  id: '/api/markets',
-  path: '/api/markets',
+const NewsRoute = NewsRouteImport.update({
+  id: '/news',
+  path: '/news',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiNewsRoute = ApiNewsRouteImport.update({
-  id: '/api/news',
-  path: '/api/news',
+const MixmanRoute = MixmanRouteImport.update({
+  id: '/mixman',
+  path: '/mixman',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTokenMetaRoute = ApiTokenMetaRouteImport.update({
-  id: '/api/token-meta',
-  path: '/api/token-meta',
+const MarketsRoute = MarketsRouteImport.update({
+  id: '/markets',
+  path: '/markets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTokensRoute = ApiTokensRouteImport.update({
@@ -117,14 +92,34 @@ const ApiTokensRoute = ApiTokensRouteImport.update({
   path: '/api/tokens',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicAlertRoute = ApiPublicAlertRouteImport.update({
-  id: '/api/public/alert',
-  path: '/api/public/alert',
+const ApiTokenMetaRoute = ApiTokenMetaRouteImport.update({
+  id: '/api/token-meta',
+  path: '/api/token-meta',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicNotifyRoute = ApiPublicNotifyRouteImport.update({
-  id: '/api/public/notify',
-  path: '/api/public/notify',
+const ApiNewsRoute = ApiNewsRouteImport.update({
+  id: '/api/news',
+  path: '/api/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMarketsRoute = ApiMarketsRouteImport.update({
+  id: '/api/markets',
+  path: '/api/markets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBalanceRoute = ApiBalanceRouteImport.update({
+  id: '/api/balance',
+  path: '/api/balance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiActivityRoute = ApiActivityRouteImport.update({
+  id: '/api/activity',
+  path: '/api/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicVisitRoute = ApiPublicVisitRouteImport.update({
+  id: '/api/public/visit',
+  path: '/api/public/visit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicThirdwebConfigRoute = ApiPublicThirdwebConfigRouteImport.update({
@@ -132,9 +127,14 @@ const ApiPublicThirdwebConfigRoute = ApiPublicThirdwebConfigRouteImport.update({
   path: '/api/public/thirdweb-config',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicVisitRoute = ApiPublicVisitRouteImport.update({
-  id: '/api/public/visit',
-  path: '/api/public/visit',
+const ApiPublicNotifyRoute = ApiPublicNotifyRouteImport.update({
+  id: '/api/public/notify',
+  path: '/api/public/notify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicAlertRoute = ApiPublicAlertRouteImport.update({
+  id: '/api/public/alert',
+  path: '/api/public/alert',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicTelegramWebhookRoute =
@@ -319,67 +319,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/how-it-works': {
-      id: '/how-it-works'
-      path: '/how-it-works'
-      fullPath: '/how-it-works'
-      preLoaderRoute: typeof HowItWorksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/markets': {
-      id: '/markets'
-      path: '/markets'
-      fullPath: '/markets'
-      preLoaderRoute: typeof MarketsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mixman': {
-      id: '/mixman'
-      path: '/mixman'
-      fullPath: '/mixman'
-      preLoaderRoute: typeof MixmanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/news': {
-      id: '/news'
-      path: '/news'
-      fullPath: '/news'
-      preLoaderRoute: typeof NewsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/support-inbox': {
-      id: '/support-inbox'
-      path: '/support-inbox'
-      fullPath: '/support-inbox'
-      preLoaderRoute: typeof SupportInboxRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/swap': {
-      id: '/swap'
-      path: '/swap'
-      fullPath: '/swap'
-      preLoaderRoute: typeof SwapRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trade': {
-      id: '/trade'
-      path: '/trade'
-      fullPath: '/trade'
-      preLoaderRoute: typeof TradeRouteImport
+    '/withdraw': {
+      id: '/withdraw'
+      path: '/withdraw'
+      fullPath: '/withdraw'
+      preLoaderRoute: typeof WithdrawRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/wallet': {
@@ -389,46 +333,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WalletRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/withdraw': {
-      id: '/withdraw'
-      path: '/withdraw'
-      fullPath: '/withdraw'
-      preLoaderRoute: typeof WithdrawRouteImport
+    '/trade': {
+      id: '/trade'
+      path: '/trade'
+      fullPath: '/trade'
+      preLoaderRoute: typeof TradeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/activity': {
-      id: '/api/activity'
-      path: '/api/activity'
-      fullPath: '/api/activity'
-      preLoaderRoute: typeof ApiActivityRouteImport
+    '/swap': {
+      id: '/swap'
+      path: '/swap'
+      fullPath: '/swap'
+      preLoaderRoute: typeof SwapRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/balance': {
-      id: '/api/balance'
-      path: '/api/balance'
-      fullPath: '/api/balance'
-      preLoaderRoute: typeof ApiBalanceRouteImport
+    '/support-inbox': {
+      id: '/support-inbox'
+      path: '/support-inbox'
+      fullPath: '/support-inbox'
+      preLoaderRoute: typeof SupportInboxRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/markets': {
-      id: '/api/markets'
-      path: '/api/markets'
-      fullPath: '/api/markets'
-      preLoaderRoute: typeof ApiMarketsRouteImport
+    '/news': {
+      id: '/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof NewsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/news': {
-      id: '/api/news'
-      path: '/api/news'
-      fullPath: '/api/news'
-      preLoaderRoute: typeof ApiNewsRouteImport
+    '/mixman': {
+      id: '/mixman'
+      path: '/mixman'
+      fullPath: '/mixman'
+      preLoaderRoute: typeof MixmanRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/token-meta': {
-      id: '/api/token-meta'
-      path: '/api/token-meta'
-      fullPath: '/api/token-meta'
-      preLoaderRoute: typeof ApiTokenMetaRouteImport
+    '/markets': {
+      id: '/markets'
+      path: '/markets'
+      fullPath: '/markets'
+      preLoaderRoute: typeof MarketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/tokens': {
@@ -438,18 +403,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTokensRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/alert': {
-      id: '/api/public/alert'
-      path: '/api/public/alert'
-      fullPath: '/api/public/alert'
-      preLoaderRoute: typeof ApiPublicAlertRouteImport
+    '/api/token-meta': {
+      id: '/api/token-meta'
+      path: '/api/token-meta'
+      fullPath: '/api/token-meta'
+      preLoaderRoute: typeof ApiTokenMetaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/notify': {
-      id: '/api/public/notify'
-      path: '/api/public/notify'
-      fullPath: '/api/public/notify'
-      preLoaderRoute: typeof ApiPublicNotifyRouteImport
+    '/api/news': {
+      id: '/api/news'
+      path: '/api/news'
+      fullPath: '/api/news'
+      preLoaderRoute: typeof ApiNewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/markets': {
+      id: '/api/markets'
+      path: '/api/markets'
+      fullPath: '/api/markets'
+      preLoaderRoute: typeof ApiMarketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/balance': {
+      id: '/api/balance'
+      path: '/api/balance'
+      fullPath: '/api/balance'
+      preLoaderRoute: typeof ApiBalanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/activity': {
+      id: '/api/activity'
+      path: '/api/activity'
+      fullPath: '/api/activity'
+      preLoaderRoute: typeof ApiActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/visit': {
+      id: '/api/public/visit'
+      path: '/api/public/visit'
+      fullPath: '/api/public/visit'
+      preLoaderRoute: typeof ApiPublicVisitRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/thirdweb-config': {
@@ -459,11 +452,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicThirdwebConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/visit': {
-      id: '/api/public/visit'
-      path: '/api/public/visit'
-      fullPath: '/api/public/visit'
-      preLoaderRoute: typeof ApiPublicVisitRouteImport
+    '/api/public/notify': {
+      id: '/api/public/notify'
+      path: '/api/public/notify'
+      fullPath: '/api/public/notify'
+      preLoaderRoute: typeof ApiPublicNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/alert': {
+      id: '/api/public/alert'
+      path: '/api/public/alert'
+      fullPath: '/api/public/alert'
+      preLoaderRoute: typeof ApiPublicAlertRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/telegram/webhook': {
