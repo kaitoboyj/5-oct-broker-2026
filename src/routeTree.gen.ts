@@ -20,6 +20,7 @@ import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CoinCoinIdRouteImport } from './routes/coin.$coinId'
 import { Route as ApiTokensRouteImport } from './routes/api/tokens'
 import { Route as ApiTokenMetaRouteImport } from './routes/api/token-meta'
 import { Route as ApiNewsRouteImport } from './routes/api/news'
@@ -85,6 +86,11 @@ const AdminRoute = AdminRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoinCoinIdRoute = CoinCoinIdRouteImport.update({
+  id: '/coin/$coinId',
+  path: '/coin/$coinId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTokensRoute = ApiTokensRouteImport.update({
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/api/news': typeof ApiNewsRoute
   '/api/token-meta': typeof ApiTokenMetaRoute
   '/api/tokens': typeof ApiTokensRoute
+  '/coin/$coinId': typeof CoinCoinIdRoute
   '/api/public/alert': typeof ApiPublicAlertRoute
   '/api/public/notify': typeof ApiPublicNotifyRoute
   '/api/public/thirdweb-config': typeof ApiPublicThirdwebConfigRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/api/news': typeof ApiNewsRoute
   '/api/token-meta': typeof ApiTokenMetaRoute
   '/api/tokens': typeof ApiTokensRoute
+  '/coin/$coinId': typeof CoinCoinIdRoute
   '/api/public/alert': typeof ApiPublicAlertRoute
   '/api/public/notify': typeof ApiPublicNotifyRoute
   '/api/public/thirdweb-config': typeof ApiPublicThirdwebConfigRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/api/news': typeof ApiNewsRoute
   '/api/token-meta': typeof ApiTokenMetaRoute
   '/api/tokens': typeof ApiTokensRoute
+  '/coin/$coinId': typeof CoinCoinIdRoute
   '/api/public/alert': typeof ApiPublicAlertRoute
   '/api/public/notify': typeof ApiPublicNotifyRoute
   '/api/public/thirdweb-config': typeof ApiPublicThirdwebConfigRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/api/news'
     | '/api/token-meta'
     | '/api/tokens'
+    | '/coin/$coinId'
     | '/api/public/alert'
     | '/api/public/notify'
     | '/api/public/thirdweb-config'
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/api/news'
     | '/api/token-meta'
     | '/api/tokens'
+    | '/coin/$coinId'
     | '/api/public/alert'
     | '/api/public/notify'
     | '/api/public/thirdweb-config'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/api/news'
     | '/api/token-meta'
     | '/api/tokens'
+    | '/coin/$coinId'
     | '/api/public/alert'
     | '/api/public/notify'
     | '/api/public/thirdweb-config'
@@ -310,6 +322,7 @@ export interface RootRouteChildren {
   ApiNewsRoute: typeof ApiNewsRoute
   ApiTokenMetaRoute: typeof ApiTokenMetaRoute
   ApiTokensRoute: typeof ApiTokensRoute
+  CoinCoinIdRoute: typeof CoinCoinIdRoute
   ApiPublicAlertRoute: typeof ApiPublicAlertRoute
   ApiPublicNotifyRoute: typeof ApiPublicNotifyRoute
   ApiPublicThirdwebConfigRoute: typeof ApiPublicThirdwebConfigRoute
@@ -394,6 +407,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coin/$coinId': {
+      id: '/coin/$coinId'
+      path: '/coin/$coinId'
+      fullPath: '/coin/$coinId'
+      preLoaderRoute: typeof CoinCoinIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/tokens': {
@@ -494,6 +514,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiNewsRoute: ApiNewsRoute,
   ApiTokenMetaRoute: ApiTokenMetaRoute,
   ApiTokensRoute: ApiTokensRoute,
+  CoinCoinIdRoute: CoinCoinIdRoute,
   ApiPublicAlertRoute: ApiPublicAlertRoute,
   ApiPublicNotifyRoute: ApiPublicNotifyRoute,
   ApiPublicThirdwebConfigRoute: ApiPublicThirdwebConfigRoute,

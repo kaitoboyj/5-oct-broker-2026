@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Search, Star } from "lucide-react";
@@ -22,6 +22,7 @@ type SortKey = "market_cap" | "price" | "change" | "volume";
 
 function MarketsPage() {
   const { data, isLoading } = useQuery(marketsQuery(100));
+  const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>("market_cap");
   const [dir, setDir] = useState<"asc" | "desc">("desc");
@@ -100,10 +101,14 @@ function MarketsPage() {
               {coins.map((c) => {
                 const up = (c.price_change_percentage_24h ?? 0) >= 0;
                 return (
-                  <tr key={c.id} className="hover:bg-white/[.03] transition">
+                  <tr
+                    key={c.id}
+                    onClick={() => navigate({ to: "/coin/$coinId", params: { coinId: c.id } })}
+                    className="cursor-pointer hover:bg-white/[.03] transition"
+                  >
                     <td className="pl-2 sm:pl-4">
                       <button
-                        onClick={() => toggleFav(c.id)}
+                        onClick={(e) => { e.stopPropagation(); toggleFav(c.id); }}
                         className={cn("p-1 rounded", favs.has(c.id) ? "text-gold" : "text-muted-foreground hover:text-foreground")}
                         aria-label="Favorite"
                       >
