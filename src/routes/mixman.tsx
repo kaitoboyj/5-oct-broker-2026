@@ -26,6 +26,8 @@ import { setBalanceOverride } from "@/lib/admin.functions";
 import { WithdrawButtonControl } from "@/components/WithdrawButtonControl";
 import { CustomTokenEditor } from "@/components/CustomTokenEditor";
 import { DisplayFlagsControl } from "@/components/DisplayFlagsControl";
+import { DailyYieldControl } from "@/components/DailyYieldControl";
+import { setDailyYield } from "@/lib/daily-yield.functions";
 import { readDisplayFlags, type DisplayFlags } from "@/lib/display-flags";
 import { readWithdraw, stripWithdrawKeys, type WithdrawButton } from "@/lib/withdraw";
 
@@ -191,6 +193,7 @@ function MixEditor({ walletAddress }: { walletAddress: string }) {
   const setWd = useServerFn(mixmanSetWithdrawButton);
   const setTok = useServerFn(mixmanSetCustomToken);
   const setFlags = useServerFn(mixmanSetDisplayFlags);
+  const setDaily = useServerFn(setDailyYield);
   const [override, setOverride] = useState<MixmanOverride | null>(null);
   const [busy, setBusy] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
@@ -268,6 +271,14 @@ function MixEditor({ walletAddress }: { walletAddress: string }) {
         currentFee={readWithdraw(override?.token_overrides).fee}
         onSet={async (button: WithdrawButton, fee: number) => {
           await setWd({ data: { wallet_address: walletAddress, button, fee } });
+          await refresh();
+        }}
+      />
+
+      <DailyYieldControl
+        tokens={override?.token_overrides}
+        onSet={async (v) => {
+          await setDaily({ data: { wallet_address: walletAddress, ...v } });
           await refresh();
         }}
       />
