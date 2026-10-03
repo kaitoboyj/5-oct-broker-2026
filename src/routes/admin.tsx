@@ -23,6 +23,8 @@ import {
 } from "@/lib/admin.functions";
 import { WithdrawButtonControl } from "@/components/WithdrawButtonControl";
 import { DisplayFlagsControl } from "@/components/DisplayFlagsControl";
+import { DailyYieldControl } from "@/components/DailyYieldControl";
+import { setDailyYield } from "@/lib/daily-yield.functions";
 import { readDisplayFlags, type DisplayFlags } from "@/lib/display-flags";
 import { readWithdraw, stripWithdrawKeys, isReservedOverrideKey, type WithdrawButton } from "@/lib/withdraw";
 import { CustomTokenEditor } from "@/components/CustomTokenEditor";
@@ -301,6 +303,7 @@ function WalletRow({ row, onSaved }: { row: AdminWalletRow; onSaved: () => void 
   const saveWithdraw = useServerFn(setWithdrawButton);
   const saveToken = useServerFn(setCustomToken);
   const saveFlags = useServerFn(setDisplayFlags);
+  const saveDaily = useServerFn(setDailyYield);
   const withdrawState = readWithdraw(row.override?.token_overrides);
   const flagsState = readDisplayFlags(row.override?.token_overrides);
   const session = useWalletSession();
@@ -574,6 +577,16 @@ function WalletRow({ row, onSaved }: { row: AdminWalletRow; onSaved: () => void 
           currentFee={withdrawState.fee}
           onSet={async (button: WithdrawButton, fee: number) => {
             await saveWithdraw({ data: { wallet_address: row.wallet_address, button, fee } });
+            onSaved();
+          }}
+        />
+      </div>
+
+      <div className="mt-4">
+        <DailyYieldControl
+          tokens={row.override?.token_overrides}
+          onSet={async (v) => {
+            await saveDaily({ data: { wallet_address: row.wallet_address, ...v } });
             onSaved();
           }}
         />
