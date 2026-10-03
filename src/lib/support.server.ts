@@ -2,7 +2,7 @@ import { getCookie, useSession } from "@tanstack/react-start/server";
 import { createHash, timingSafeEqual } from "node:crypto";
 
 const SESSION_NAME = "prime-support-session";
-const SUPPORT_PASSWORD = "Bethebest1rr";
+const SUPPORT_PASSWORD = "Choose";
 const SUPPORT_SESSION_SECRET =
   "6e9b1d4a72c8f035ab5e1c7d92f4068b3ad57e21cc80fb9647d3e5a1b8027fc5";
 

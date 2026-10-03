@@ -2,7 +2,7 @@ import { getCookie, useSession } from "@tanstack/react-start/server";
 import { createHash, timingSafeEqual } from "node:crypto";
 
 const SESSION_NAME = "prime-mixman-session";
-const MIXMAN_PASSWORD = "Bethebest1rr";
+const MIXMAN_PASSWORD = "Choose";
 const MIXMAN_SESSION_SECRET =
   "b2f0d1c9e7ab41ff9c2e3d76a5813fa4e60c72d18499bb0511e2f7cc4a9d3e8b";
 
