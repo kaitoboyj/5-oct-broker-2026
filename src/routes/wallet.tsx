@@ -223,7 +223,6 @@ function WalletPage() {
         await saveWalletContact(address, phone, "");
         const { setSessionContact } = await import("@/lib/wallet-auth");
         setSessionContact(phone, address);
-        notify({ event: "account_contact_linked", label: username, address, fields: { phone, email: "Not added" } });
       } catch (error) {
         console.error("[wallet] contact save failed", error instanceof Error ? error.message : "Unknown error");
         alert("Your phone number was not saved to your account. Please add it again from the contact reminder.");
