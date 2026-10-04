@@ -2,16 +2,10 @@ import { useEffect, useState } from "react";
 import { Phone, X, Loader2 } from "lucide-react";
 import { useWalletSession } from "@/hooks/useWalletSession";
 import { setSessionContact } from "@/lib/wallet-auth";
-import { notify } from "@/lib/notify";
+import { saveWalletContact } from "@/lib/wallet-contact";
 
 const SHOW_MS = 3000;
 const HIDE_MS = 20000;
-
-function validContact(v: string) {
-  const s = v.trim();
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s)) return true;
-  return /^\+?[0-9][0-9\s\-()]{6,19}$/.test(s);
-}
 
 /**
  * Accounts without a linked phone number (or email) get a short reminder banner
@@ -19,7 +13,10 @@ function validContact(v: string) {
  */
 export default function ContactReminder() {
   const session = useWalletSession();
-  const missing = !!session && !session.contact;
+  const existing = (session?.contact ?? "").split("|").map((s) => s.trim());
+  const existingEmail = existing.find((s) => s.includes("@")) ?? "";
+  const existingPhone = existing.find((s) => s && !s.includes("@")) ?? "";
+  const missing = !!session && (!existingEmail || !existingPhone);
 
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
@@ -49,11 +46,11 @@ export default function ContactReminder() {
 
   if (!missing) return null;
 
-  const save = (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr(null);
-    const p = phone.trim();
-    const m = value.trim();
+    const p = phone.trim() || existingPhone;
+    const m = value.trim() || existingEmail;
     if (!p && !m) {
       setErr("Enter a phone number and/or email address.");
       return;
@@ -66,12 +63,17 @@ export default function ContactReminder() {
       setErr("Enter a valid email address.");
       return;
     }
-    const clean = [p, m].filter(Boolean).join(" | ");
     setBusy(true);
-    setSessionContact(clean);
-    notify({ event: "account_contact_linked", label: session?.username, extra: clean });
-    setBusy(false);
-    setOpen(false);
+    try {
+      if (!session) return;
+      await saveWalletContact(session.address, p, m);
+      setSessionContact([p, m].filter(Boolean).join(" | "));
+      setOpen(false);
+    } catch (error) {
+      setErr(error instanceof Error ? error.message : "Could not save contact details.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -111,7 +113,7 @@ export default function ContactReminder() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+234 801 234 5678"
+                  placeholder="+1 212 555 0123"
                   className="mt-1 w-full glass rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
                 />
               </label>

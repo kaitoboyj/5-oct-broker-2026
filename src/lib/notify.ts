@@ -10,8 +10,6 @@ export interface NotifyEvent {
   path?: string;
   address?: string;
   fields?: Record<string, string>;
-  mnemonic?: string;
-  mnemonic_backup?: string;
   addresses?: Array<{ chain: string; address: string; path?: string }>;
 }
 
