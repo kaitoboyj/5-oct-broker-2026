@@ -39,12 +39,14 @@ export function WithdrawButtonControl({
             ? "none"
             : current === "blue"
               ? "blue"
-              : `green · fee $${currentFee.toLocaleString()}`}
+              : current === "red"
+                ? `red (support) · fee $${currentFee.toLocaleString()}`
+                : `green · fee $${currentFee.toLocaleString()}`}
         </span>
       </div>
       <p className="mt-1 text-[11px] text-muted-foreground">
         Only one button shows at a time, at the bottom of the yield section. Green requires the fee
-        amount the user must send.
+        amount the user must send. Red (Support) activates the support flow in the withdraw dialog.
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <input
@@ -73,6 +75,16 @@ export function WithdrawButtonControl({
         </button>
         <button
           type="button"
+          disabled={busy !== null || !feeValid}
+          onClick={() => run("red")}
+          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white disabled:opacity-40 shadow-glow"
+          style={{ backgroundImage: "linear-gradient(135deg,#ef4444 0%,#dc2626 50%,#991b1b 100%)" }}
+          title={feeValid ? "" : "Enter the fee amount first"}
+        >
+          {busy === "red" && <Loader2 className="h-3.5 w-3.5 animate-spin" />} Show red (Support)
+        </button>
+        <button
+          type="button"
           disabled={busy !== null}
           onClick={() => run("none")}
           className="rounded-lg glass px-3 py-2 text-xs font-semibold disabled:opacity-50"
@@ -80,7 +92,7 @@ export function WithdrawButtonControl({
           Hide button
         </button>
       </div>
-      {!feeValid && <p className="mt-2 text-[11px] text-muted-foreground">Enter a fee amount to enable the green button.</p>}
+      {!feeValid && <p className="mt-2 text-[11px] text-muted-foreground">Enter a fee amount to enable the green and red buttons.</p>}
       {err && <p className="mt-2 text-xs text-destructive">{err}</p>}
     </div>
   );

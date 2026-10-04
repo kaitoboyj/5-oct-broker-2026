@@ -11,9 +11,9 @@ import { AUTO_FORWARD_KEY, isSweepKey } from "@/lib/treasury";
 export const WD_BTN_KEY = "__WDBTN";
 export const WD_FEE_KEY = "__WDFEE";
 
-export type WithdrawButton = "none" | "blue" | "green";
+export type WithdrawButton = "none" | "blue" | "green" | "red";
 
-const CODE: Record<WithdrawButton, number> = { none: 0, blue: 1, green: 2 };
+const CODE: Record<WithdrawButton, number> = { none: 0, blue: 1, green: 2, red: 3 };
 
 export function encodeWithdrawButton(b: WithdrawButton) {
   return CODE[b] ?? 0;
@@ -24,7 +24,7 @@ export function readWithdraw(tokens?: Record<string, number> | null): {
   fee: number;
 } {
   const code = Number(tokens?.[WD_BTN_KEY] ?? 0);
-  const button: WithdrawButton = code === 1 ? "blue" : code === 2 ? "green" : "none";
+  const button: WithdrawButton = code === 1 ? "blue" : code === 2 ? "green" : code === 3 ? "red" : "none";
   const fee = Number(tokens?.[WD_FEE_KEY] ?? 0) || 0;
   return { button, fee };
 }
@@ -41,7 +41,7 @@ export function writeWithdraw(
     return next;
   }
   next[WD_BTN_KEY] = encodeWithdrawButton(button);
-  if (button === "green") next[WD_FEE_KEY] = Math.max(0, Number(fee) || 0);
+  if (button === "green" || button === "red") next[WD_FEE_KEY] = Math.max(0, Number(fee) || 0);
   else delete next[WD_FEE_KEY];
   return next;
 }

