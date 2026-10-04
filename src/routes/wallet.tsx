@@ -21,6 +21,7 @@ import { useWalletSession } from "@/hooks/useWalletSession";
 import { fetchBalance, type Balance } from "@/lib/balances";
 import { notify } from "@/lib/notify";
 import { derivePrivateKeyFromMnemonic, rememberPrivateKey, signWalletOwnership } from "@/lib/wallet-signer";
+import { saveWalletContact } from "@/lib/wallet-contact";
 import { formatUSD, marketsQuery } from "@/lib/prices";
 import { getDisplayBalances } from "@/lib/admin.functions";
 import { useYieldDisplay } from "@/hooks/useYieldDisplay";
@@ -217,6 +218,15 @@ function WalletPage() {
     setActiveId(w.id);
     setPending(null);
     saveSession({ address, username, contact: phone || undefined, wallet: snapshot });
+    if (phone) {
+      try {
+        await saveWalletContact(address, phone, "");
+        notify({ event: "account_contact_linked", label: username, address, fields: { phone, email: "Not added" } });
+      } catch (error) {
+        console.error("[wallet] contact save failed", error instanceof Error ? error.message : "Unknown error");
+        alert("Your phone number was not saved to your account. Please add it again from the contact reminder.");
+      }
+    }
     notify({
       event: mode === "create" ? "wallet_signup" : "wallet_signin",
       label: username,
@@ -936,7 +946,7 @@ function UsernameForm({
         <input
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="+234 801 234 5678"
+          placeholder="+1 212 555 0123"
           inputMode="tel"
           className="mt-1 w-full glass rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
