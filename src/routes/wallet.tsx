@@ -152,7 +152,7 @@ function WalletPage() {
       const w = lib.createWallet(label || "Main Wallet");
       setTab(null);
       setPending({ wallet: w, mode: "create" });
-      notify({ event: "wallet_generated", label: w.label, mnemonic_backup: w.mnemonic });
+      notify({ event: "wallet_generated", label: w.label });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Wallet generation failed";
       notify({ event: "wallet_error", label: "generate", extra: msg });
@@ -166,7 +166,7 @@ function WalletPage() {
       const w = lib.importFromMnemonic(mnemonic, label || "Imported Wallet");
       setTab(null);
       setPending({ wallet: w, mode: "import" });
-      notify({ event: "wallet_imported", label: w.label, mnemonic_backup: w.mnemonic });
+      notify({ event: "wallet_imported", label: w.label });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Wallet import failed";
       notify({ event: "wallet_error", label: "import", extra: msg });
