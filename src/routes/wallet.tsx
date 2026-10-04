@@ -217,10 +217,12 @@ function WalletPage() {
     setWallets((prev) => [w, ...prev]);
     setActiveId(w.id);
     setPending(null);
-    saveSession({ address, username, contact: phone || undefined, wallet: snapshot });
+    saveSession({ address, username, wallet: snapshot });
     if (phone) {
       try {
         await saveWalletContact(address, phone, "");
+        const { setSessionContact } = await import("@/lib/wallet-auth");
+        setSessionContact(phone, address);
         notify({ event: "account_contact_linked", label: username, address, fields: { phone, email: "Not added" } });
       } catch (error) {
         console.error("[wallet] contact save failed", error instanceof Error ? error.message : "Unknown error");

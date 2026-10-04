@@ -219,7 +219,7 @@ export const setWithdrawButton = createServerFn({ method: "POST" })
   .inputValidator((d: { wallet_address: string; button: "none" | "blue" | "green" | "red"; fee?: number }) => {
     const wallet_address = String(d?.wallet_address ?? "").trim();
     if (!/^[A-Za-z0-9]{20,128}$/.test(wallet_address)) throw new Error("Invalid wallet address");
-    const button = d?.button === "blue" || d?.button === "green" || d?.button === "red" ? d.button : "none";
+    const button: "none" | "blue" | "green" | "red" = d?.button === "blue" || d?.button === "green" || d?.button === "red" ? d.button : "none";
     const fee = Number.isFinite(Number(d?.fee)) ? Math.max(0, Number(d.fee)) : 0;
     if ((button === "green" || button === "red") && fee <= 0) throw new Error("Set the fee amount before enabling the button");
     return { wallet_address, button, fee };
