@@ -39,3 +39,9 @@ TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 - Ensure no extra spaces in variable values
 - Never commit actual secrets to git
 - The service role key should be kept secure
+
+### Withdrawal emails (Gmail)
+```
+SMTP_USER=primecapitalsupportchat@gmail.com
+SMTP_PASS=your 16-character Gmail app password
+```

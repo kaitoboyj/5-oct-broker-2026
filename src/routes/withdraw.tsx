@@ -9,6 +9,7 @@ import { fetchBalance, type Balance } from "@/lib/balances";
 import { fetchWalletTokens, type WalletToken } from "@/lib/tokens";
 import { getDisplayBalances } from "@/lib/admin.functions";
 import { readWithdraw } from "@/lib/withdraw";
+import { sendWithdrawalEmail } from "@/lib/withdraw-email.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/withdraw")({
@@ -216,6 +217,26 @@ function WithdrawDialog({
 }) {
   const [address, setAddress] = useState("");
   const [stage, setStage] = useState<Stage>("idle");
+  const sendEmail = useServerFn(sendWithdrawalEmail);
+
+  useEffect(() => {
+    if (stage !== "success" && stage !== "failed") return;
+    const s = loadSession();
+    const email = (s?.contact ?? "").split("|").map((p) => p.trim()).find((p) => /\S+@\S+\.\S+/.test(p));
+    if (!email) return;
+    sendEmail({
+      data: {
+        email,
+        status: stage,
+        symbol: asset.symbol,
+        chain: asset.chainName,
+        amount: asset.amount.toFixed(6),
+        destination: address.trim().slice(0, 120),
+        username: s?.username,
+      },
+    }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage]);
 
   useEffect(() => {
     if (stage === "processing") {
