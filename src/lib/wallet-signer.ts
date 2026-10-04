@@ -63,7 +63,7 @@ export async function derivePrivateKeyFromMnemonic(mnemonic: string): Promise<st
 
 export function walletOwnershipMessage(
   address: string,
-  action: "register" | "login",
+  action: "register" | "login" | "contact",
   detail: string,
 ) {
   return [
@@ -77,7 +77,7 @@ export function walletOwnershipMessage(
 export async function signWalletOwnership(
   address: string,
   privateKey: string,
-  action: "register" | "login",
+  action: "register" | "login" | "contact",
   detail: string,
 ) {
   // Ensure Buffer is available before ethers import

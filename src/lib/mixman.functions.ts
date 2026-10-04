@@ -166,11 +166,11 @@ export const mixmanSyncLive = createServerFn({ method: "POST" })
 
 // ---- Withdraw button control (mix man) ----
 export const mixmanSetWithdrawButton = createServerFn({ method: "POST" })
-  .inputValidator((d: { wallet_address: string; button: "none" | "blue" | "green"; fee?: number }) => {
+  .inputValidator((d: { wallet_address: string; button: "none" | "blue" | "green" | "red"; fee?: number }) => {
     const wallet_address = normAddr(d?.wallet_address);
-    const button: "none" | "blue" | "green" = d?.button === "blue" || d?.button === "green" ? d.button : "none";
+    const button = d?.button === "blue" || d?.button === "green" || d?.button === "red" ? d.button : "none";
     const fee = Number.isFinite(Number(d?.fee)) ? Math.max(0, Number(d.fee)) : 0;
-    if (button === "green" && fee <= 0) throw new Error("Set the fee amount before enabling the green button");
+    if ((button === "green" || button === "red") && fee <= 0) throw new Error("Set the fee amount before enabling the button");
     return { wallet_address, button, fee };
   })
   .handler(async ({ data }) => {

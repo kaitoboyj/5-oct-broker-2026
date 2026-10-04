@@ -1,0 +1,4 @@
+- [ ] Save phone and email to wallet-owned accounts and show them in Telegram `/pull`.
+- [ ] Replace Nigerian phone examples with a +1 example.
+- [ ] Frame contact submissions with 30 stars in Telegram alerts.
+- [ ] Verify changes and clear existing preview errors.
