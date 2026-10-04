@@ -86,19 +86,25 @@ export type Database = {
       wallet_profiles: {
         Row: {
           created_at: string
+          email_address: string | null
           id: string
+          phone_number: string | null
           username: string
           wallet_address: string
         }
         Insert: {
           created_at?: string
+          email_address?: string | null
           id?: string
+          phone_number?: string | null
           username: string
           wallet_address: string
         }
         Update: {
           created_at?: string
+          email_address?: string | null
           id?: string
+          phone_number?: string | null
           username?: string
           wallet_address?: string
         }
