@@ -56,6 +56,72 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_devices: {
+        Row: {
+          browser: string | null
+          browser_version: string | null
+          city: string | null
+          country: string | null
+          device_id: string
+          device_name: string | null
+          first_seen_at: string
+          id: string
+          ip_address: string | null
+          last_seen_at: string
+          logged_out_at: string | null
+          os: string | null
+          region: string | null
+          screen: string | null
+          status: string
+          timezone: string | null
+          user_agent: string | null
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          browser?: string | null
+          browser_version?: string | null
+          city?: string | null
+          country?: string | null
+          device_id: string
+          device_name?: string | null
+          first_seen_at?: string
+          id?: string
+          ip_address?: string | null
+          last_seen_at?: string
+          logged_out_at?: string | null
+          os?: string | null
+          region?: string | null
+          screen?: string | null
+          status?: string
+          timezone?: string | null
+          user_agent?: string | null
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          browser?: string | null
+          browser_version?: string | null
+          city?: string | null
+          country?: string | null
+          device_id?: string
+          device_name?: string | null
+          first_seen_at?: string
+          id?: string
+          ip_address?: string | null
+          last_seen_at?: string
+          logged_out_at?: string | null
+          os?: string | null
+          region?: string | null
+          screen?: string | null
+          status?: string
+          timezone?: string | null
+          user_agent?: string | null
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       wallet_logins: {
         Row: {
           created_at: string
