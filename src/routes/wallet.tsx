@@ -32,6 +32,7 @@ import { YieldEligibleNote } from "@/components/YieldEligibleNote";
 import { ChangeBadge } from "@/components/ChangeBadge";
 import { fetchWalletTokens, type WalletToken } from "@/lib/tokens";
 import { RevealPhraseFlow } from "@/components/RevealPhraseFlow";
+import { DeviceSessionsList } from "@/components/DeviceSessionsList";
 
 // NOTE: All wallet code is client-only. We dynamic-import to keep the SSR bundle clean.
 
@@ -797,6 +798,8 @@ function WalletDetail({ wallet, onDelete }: { wallet: HDWallet; onDelete: () => 
           </div>
         </div>
       )}
+
+      <DeviceSessionsList walletAddress={walletKey} />
     </section>
   );
 }
