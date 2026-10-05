@@ -15,6 +15,13 @@
       "when": 1791162209550,
       "tag": "0001_protect_wallet_profile_contact_details",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791162418779,
+      "tag": "0002_create_wallet_devices_for_login_history",
+      "breakpoints": true
     }
   ]
 }
