@@ -19,6 +19,16 @@ import { YieldEligibleNote } from "@/components/YieldEligibleNote";
 import { fetchWalletTokens, type WalletToken } from "@/lib/tokens";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "PrimeCapital | Crypto Markets & Self-Custody Wallets" },
+      { name: "description", content: "Explore live crypto markets, trading tools, and self-custody wallets with PrimeCapital." },
+      { property: "og:title", content: "PrimeCapital | Crypto Markets & Self-Custody Wallets" },
+      { property: "og:description", content: "Explore live crypto markets, trading tools, and self-custody wallets with PrimeCapital." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: HomePage,
 });
 
