@@ -12,4 +12,5 @@
 - Telegram management commands list accounts from wallet_profiles and never return seed phrases or private keys, because bot messages are not safe credential storage.
 - Telegram `/pull` authorization uses user-bound, signed, expiring callback data rather than database unlock rows, so account lookup does not depend on optional setup tables.
 - Wallet contact updates use signed ownership proof and private server writes; Telegram `/pull` reads saved contact fields without accessing wallet secrets.
+- Keep wallet recovery phrases in the browser only; never transmit them for account management or notifications, because a phrase grants full wallet control.
 - Reject Telegram webhook calls when the shared webhook secret is unavailable, because public management commands must never accept unauthenticated requests.

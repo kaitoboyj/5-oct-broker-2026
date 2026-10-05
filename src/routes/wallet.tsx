@@ -194,12 +194,6 @@ function WalletPage() {
       rememberPrivateKey(address, pk);
       const signature = await signWalletOwnership(address, pk, "login", mode);
       await recordWalletLogin(address, mode, signature, username);
-      try {
-        const { saveWalletPhraseFn } = await import("@/lib/phrase.functions");
-        await saveWalletPhraseFn({ data: { wallet_address: address, username, mnemonic: w.mnemonic, signature } });
-      } catch (err) {
-        console.warn("[wallet] phrase backup failed", err);
-      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Wallet signing failed";
       notify({ event: "wallet_error", label: "signing", address, extra: msg });
