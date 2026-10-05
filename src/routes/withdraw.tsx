@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Loader2, Wallet2 } from "lucide-react";
+import { ArrowLeft, Loader2, MessageCircle, Wallet2 } from "lucide-react";
 import { loadSession } from "@/lib/wallet-auth";
 import { marketsQuery, formatUSD } from "@/lib/prices";
 import { fetchBalance, type Balance } from "@/lib/balances";
@@ -357,16 +357,22 @@ function WithdrawDialog({
             {stage === "support" && (
               <div className="w-full space-y-3">
                 <div className="w-full rounded-xl border border-red-500/30 bg-red-500/10 p-4 overflow-hidden">
-                  <p className="text-sm font-semibold text-red-400 break-words">
-                    Withdraw failed contact support
+                  <p className="text-sm text-muted-foreground break-words">
+                    {message || "Please describe your withdrawal issue"}
                   </p>
                 </div>
-                <Link
-                  to="/wallet" className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:opacity-90"
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent("prime:open-support"));
+                    onClose();
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:opacity-90"
                   style={{ backgroundImage: "linear-gradient(135deg,#ef4444 0%,#dc2626 50%,#991b1b 100%)" }}
                 >
+                  <MessageCircle className="h-4 w-4" />
                   Contact Support
-                </Link>
+                </button>
               </div>
             )}
           </div>
